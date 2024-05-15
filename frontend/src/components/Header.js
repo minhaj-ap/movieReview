@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useTheme, useMediaQuery, Icon } from "@mui/material";
 export default function Header() {
   const [isDark, setisDark] = useState(false);
-  const [search, setSearch] = useState(true);
+  const [search, setSearch] = useState(false);
   function handleSearch() {
     setSearch((prev) => !prev);
   }
@@ -16,7 +16,7 @@ export default function Header() {
   function searchFunc(e) {
     e.preventDefault();
     const searchTerm = document.getElementById("searchInput").value;
-    const baseUrl = "http://localhost:3001/movies"; // Your base URL
+    const baseUrl = "http://localhost:3001/search"; // Your base URL
     const url = `${baseUrl}?query=${encodeURIComponent(searchTerm)}`;
 
     // Make request using fetch
@@ -33,7 +33,7 @@ export default function Header() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return (
-    <header className={search && isMobile && "header_col"}>
+    <header className={search && isMobile ? "header_col": ""}>
       <div className="header_name">
         <p>CINEMA REVIEWER</p>
       </div>

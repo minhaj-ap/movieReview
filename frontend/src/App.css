@@ -4,10 +4,11 @@
 }
 header {
   display: flex;
-  background: #130121;
-  color: white;
-  padding: 5px;
+  background: #00000063;
+  position: absolute;
+  width: 100vw;
   align-items: center;
+  color: white;
 }
 .header_col {
   flex-direction: column;
@@ -15,6 +16,7 @@ header {
 .header_name {
   font-size: 1.5rem;
   font-weight: bold;
+  padding-left: 5px;
   flex-grow: 1;
 }
 .header_actions {
@@ -26,15 +28,33 @@ header {
   cursor: pointer;
   margin: 5px;
 }
-.header_form{
+.header_form {
   background-color: white;
   display: flex;
 }
-.header_form input{
-  padding:5px;
+.header_form input {
+  padding: 5px;
   border: none;
 }
-.header_form button{
+.header_form button {
   background-color: white;
   border: none;
+}
+
+.hero {
+  width: 100vw;
+  height: 100vh;
+  background-position: center;
+  display: flex;
+  background-repeat: no-repeat;
+  align-items: flex-end;
+  background-size: cover;
+}
+.hero_content {
+  color: white;
+  height: 100%;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }

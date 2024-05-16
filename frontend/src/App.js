@@ -7,7 +7,7 @@ function App() {
     <div className="App">
       <Header />
       <Hero />
-      {/* <List /> */}
+      <List />
     </div>
   );
 }

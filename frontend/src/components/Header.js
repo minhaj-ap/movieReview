@@ -2,6 +2,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useState } from "react";
 import { useTheme, useMediaQuery, Icon } from "@mui/material";
 export default function Header() {
@@ -33,18 +34,18 @@ export default function Header() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return (
-    <header className={search && isMobile ? "header_col": ""}>
+    <header className={search && isMobile ? "header_col" : ""}>
       <div className="header_name">
         <p>CINEMA REVIEWER</p>
       </div>
       {search ? (
         <form className="header_form" onSubmit={searchFunc}>
-          <input type="text" id="searchInput" placeholder="Search Movies..." />
           <button type="submit">
             <Icon sx={{ color: "green" }}>
               <SearchIcon />
             </Icon>
           </button>
+          <input type="text" id="searchInput" placeholder="Search Movies..." />
           <button onClick={handleSearch}>
             <Icon sx={{ color: "red" }}>
               <CloseIcon />
@@ -58,6 +59,9 @@ export default function Header() {
           </p>
           <p onClick={handleMode}>
             {isDark ? <DarkModeIcon /> : <LightModeIcon />}
+          </p>
+          <p>
+            <AccountCircleIcon />
           </p>
         </div>
       )}

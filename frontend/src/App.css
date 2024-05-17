@@ -7,13 +7,19 @@
 }
 header {
   display: flex;
-  background: #000000;
   position: fixed;
   width: 100vw;
   align-items: center;
   z-index: 1;
-  color: white;
   justify-content: space-around;
+}
+header.light {
+  background-color: white;
+  color: black;
+}
+header.dark {
+  background: #000000;
+  color: white;
 }
 .header_col {
   flex-direction: column;
@@ -22,7 +28,10 @@ header {
   font-size: 1.5rem;
   padding-left: 5px;
   color: red;
-  font-family: fantasy;
+  font-family: "Oswald", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
   letter-spacing: 1px;
   text-align: center;
 }
@@ -115,13 +124,19 @@ header {
   right: 10%;
 }
 .list-container {
-  background-color: black;
-  color: wheat;
   padding: 20px;
   display: flex;
   flex-direction: column;
   width: max-content;
   overflow-x: auto;
+}
+.list-container.dark {
+  background-color: black;
+  color: wheat;
+}
+.list-container.light {
+  background-color: white;
+  color: black;
 }
 .list {
   width: 100vw;
@@ -133,6 +148,14 @@ header {
   width: 170px;
   margin-right: 20px;
   font-family: cursive;
+  padding: 10px;
+  margin-bottom:5px;
+}
+.list > *.light {
+  border: 2px solid black;
+}
+.list > *.dark {
+border: 2px solid white;
 }
 .list_skelton {
   display: flex;
@@ -147,6 +170,26 @@ header {
   padding-right: 3em;
 }
 .list_item > div:last-child {
+  display: flex;
+  margin-bottom: 2em;
+}
+.list_item > div:last-child button.dark {
+  background-color: white;
+  color: maroon;
+}
+.list_item > div:last-child button.light {
+  background-color: black;
+  color: lightcoral;
+}
+.list_item > div:last-child button {
+  padding: 6px;
+  border: none;
+  border-radius: 5px;
+  display: flex;
+  font-weight: 800;
+}
+.list_content {
+  height: 100px;
   display: flex;
   flex-direction: column;
 }

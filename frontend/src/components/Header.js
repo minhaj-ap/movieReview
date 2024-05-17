@@ -3,17 +3,21 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useTheme, useMediaQuery, Icon } from "@mui/material";
+import { ThemeContext } from "../functions/ThemeContext";
 export default function Header() {
   const [isDark, setisDark] = useState(false);
+  const { toggleTheme } = useContext(ThemeContext);
   const [search, setSearch] = useState(false);
   function handleSearch() {
     setSearch((prev) => !prev);
   }
   function handleMode() {
+    toggleTheme();
     setisDark((prev) => !prev);
   }
+  const { theme } = useContext(ThemeContext);
   function searchFunc(e) {
     e.preventDefault();
     const searchTerm = document.getElementById("searchInput").value;
@@ -31,10 +35,10 @@ export default function Header() {
         console.error("Error fetching data:", error);
       });
   }
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const size = useTheme();
+  const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   return (
-    <header className={search && isMobile ? "header_col" : ""}>
+    <header className={`${theme}${search && isMobile ? "header_col" : ""}`}>
       <div className="header_name">
         <p>CINEMA REVIEWER</p>
       </div>

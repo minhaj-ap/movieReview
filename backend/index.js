@@ -20,11 +20,15 @@ app.get("/search", async (req, res) => {
     }
     const db = getDb();
     const regex = await RegExp(keyword, "i");
-    const result = await db.collection("movies_summary").findOne({});
-    if (!result || !result.movies) {
+    const result = await db.collection("movie_details").find({}).toArray();
+    console.log(result);
+    if (!result) {
       return res.json();
     }
-    const movies = result.movies.filter((movie) => regex.test(movie.title));
+    const movies = result.filter((movie) => {
+      return regex.test(movie.title);
+    });
+    console.log(movies);
     res.json(movies);
   } catch (error) {
     console.log(error);

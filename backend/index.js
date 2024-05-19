@@ -1,29 +1,48 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
+const bodyParser = require("body-parser");
+const { connectDb, getDb } = require("./db");
+require("dotenv").config();
 const app = express();
 const PORT = 3001;
-require("dotenv").config();
 
 app.use(cors());
+app.use(bodyParser.json());
 // Define a route to fetch movies
 
 const apiKey = process.env.TMDB_API;
 app.get("/search", async (req, res) => {
   try {
-    const { query } = req.query;
-    const response = await axios.get(
-      `https://api.themoviedb.org/3/search/movie?sort_by=popularity.desc&api_key=${apiKey}&query=${encodeURIComponent(
-        query
-      )}`
-    );
-    const movies = response.data.results;
-    movies.sort((a, b) => b.popularity - a.popularity);
+    const keyword = req.query.q;
+    if (!keyword) {
+      return res.status(400).send("No keyword provided");
+    }
+    const db = getDb();
+    const regex = await RegExp(keyword, "i");
+    const result = await db.collection("movies_summary").findOne({});
+    if (!result || !result.movies) {
+      return res.json();
+    }
+    const movies = result.movies.filter((movie) => regex.test(movie.title));
     res.json(movies);
   } catch (error) {
-    console.error("Error fetching movies:", error);
-    res.status(500).json({ error: "Error fetching movies" });
+    console.log(error);
   }
+  // try {
+  //   const { query } = req.query;
+  //   const response = await axios.get(
+  //     `https://api.themoviedb.org/3/search/movie?sort_by=popularity.desc&api_key=${apiKey}&query=${encodeURIComponent(
+  //       query
+  //     )}`
+  //   );
+  //   const movies = response.data.results;
+  //   movies.sort((a, b) => b.popularity - a.popularity);
+  //   res.json(movies);
+  // } catch (error) {
+  //   console.error("Error fetching movies:", error);
+  //   res.status(500).json({ error: "Error fetching movies" });
+  // }
 });
 app.get("/top-movie", async (req, res) => {
   const trendingUrl = `https://api.themoviedb.org/3/trending/movie/day?api_key=${apiKey}`;
@@ -52,6 +71,9 @@ app.get("/get-movies", async (req, res) => {
     console.log("error fetching data", error);
   }
 });
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+
+connectDb().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
 });

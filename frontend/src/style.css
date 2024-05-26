@@ -71,7 +71,6 @@ header.dark {
   background-size: cover;
 }
 .hero_content {
-  color: white;
   height: 100%;
   margin: 1.5em;
   display: flex;
@@ -144,18 +143,21 @@ header.dark {
   display: flex;
   margin-left: 10px;
 }
+.list.admin > * {
+  font-family: sans-serif;
+}
 .list > * {
   width: 170px;
   margin-right: 20px;
   font-family: cursive;
   padding: 10px;
-  margin-bottom:5px;
+  margin-bottom: 5px;
 }
 .list > *.light {
   border: 2px solid black;
 }
 .list > *.dark {
-border: 2px solid white;
+  border: 2px solid white;
 }
 .list_skelton {
   display: flex;
@@ -192,4 +194,35 @@ border: 2px solid white;
   height: 100px;
   display: flex;
   flex-direction: column;
+}
+/* ADMIN PAGE */
+.page_admin header {
+  height: 3em;
+  background-color: #9BBEC8;
+}
+.page_admin {
+  background-color: #164863;
+}
+.tableHead > * {
+  font-weight: 900 !important;
+}
+.list_actions.admin {
+  justify-content: space-around;
+}
+.list_item.add_button{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #427D9D;
+  border-radius: 10px;
+  margin: 10px;
+}
+.admin.list_item.items{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #9BBEC8;
+  border-radius: 10px;
+  margin: 10px;
+  padding: 10px;
 }

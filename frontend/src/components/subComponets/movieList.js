@@ -14,8 +14,7 @@ export default function MovieList({ title, genre }) {
           `http://localhost:3001/get-movies?query=${genre}`
         );
         const data = await response.json();
-        console.log(data);
-        setMovies(data.results);
+        setMovies(data);
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch", error);
@@ -23,7 +22,6 @@ export default function MovieList({ title, genre }) {
     }
     fetchData();
   }, [genre]);
-  console.log(movies);
   return (
     <>
       <h2>{title}</h2>{" "}

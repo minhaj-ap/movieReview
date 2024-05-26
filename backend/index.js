@@ -1,207 +1,218 @@
 const express = require("express");
-const nodeCache = require("node-cache");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const { connectDb, getDb } = require("./db");
-const { ObjectId } = require("mongodb");
+const { connectDb } = require("./db");
+const {
+  searchDb,
+  topFetch,
+  getMovieDb,
+  myReviewsDb,
+  getAllMovie,
+  getAllGenres,
+} = require("./getFunctions");
+const {
+  addMovieDb,
+  addReview,
+  manipulateReview,
+  setTopMovieDb,
+  eliminate,
+  editMovie,
+} = require("./postFunctions");
 require("dotenv").config();
 const app = express();
 const PORT = 3001;
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:3000" }));
 app.use(bodyParser.json());
-const cache = new nodeCache({ stdTTL: 0, checkperiod: 60 });
 app.get("/search", async (req, res) => {
   try {
-    const keyword = req.query.q;
-    if (!keyword) {
-      return res.status(400).send("No keyword provided");
-    }
-    const db = getDb();
-    const regex = await RegExp(keyword, "i");
-    const result = await db.collection("movie_details").find({}).toArray();
-    console.log(result);
-    if (!result) {
-      return res.json();
-    }
-    const movies = result.filter((movie) => {
-      return regex.test(movie.title);
-    });
-    res.json(movies);
+    const searchResult = await searchDb(req.query);
+    res.json(searchResult);
   } catch (error) {
-    res.status(500).send(error);
-    console.log(error);
+    console.error("Error:", error);
+    res
+      .status(500)
+      .send({
+        message: "An error occurred while searching the database",
+        error: error,
+      });
   }
 });
 app.get("/top-movie", async (req, res) => {
   try {
-    const db = getDb();
-    const result = await db
-      .collection("top5")
-      .aggregate([
-        {
-          $match: { _id: new ObjectId("664b68750c2cefd8aa192f4d") },
-        },
-        {
-          $unwind: "$top5",
-        },
-        {
-          $lookup: {
-            from: "movie_details",
-            localField: "top5",
-            foreignField: "id",
-            as: "movieDetails",
-          },
-        },
-        {
-          $unwind: "$movieDetails",
-        },
-        {
-          $project: {
-            _id: 0,
-            movieId: "$top5",
-            title: "$movieDetails.title",
-            desc: "$movieDetails.desc",
-            genre_ids: "$movieDetails.genre_ids",
-          },
-        },
-      ])
-      .toArray();
-    let cacheExpiry = 24 * 60 * 60;
-    const cachedResults = cache.get("top5");
-    if (!cachedResults && result) {
-      cache.set("top5", result, cacheExpiry);
-    }
-    return res.json(cachedResults || result);
+    const topResult = await topFetch();
+    res.json(topResult);
   } catch (error) {
-    res.status(500).json({ error: "error fetching data" });
-    console.error("Error fetching trending movies:", error);
+    console.error("Error:", error);
+    res
+      .status(500)
+      .send({ message: "An error occurred while fetching Top5", error: error });
   }
 });
-app.get("/get-movies", async (req, res) => {
+app.get("/get-movies-all", async (req, res) => {
   try {
-    const { query } = req.query;
-    const db = getDb();
-    const result = await db
-      .collection("movie_details")
-      .find({ genre_ids: parseInt(query) })
-      .toArray();
-    let cacheExpiry = 3 * 24 * 60 * 60;
-    const cachedResults = cache.get(`movie${query}`);
-    if (!cachedResults && result) {
-      cache.set(`movie${query}`, result, cacheExpiry);
-    }
-    return res.json(cachedResults || result);
+    const movieResult = await getAllMovie();
+    res.json(movieResult);
   } catch (error) {
-    res.status(500).json({ error: "Error fetching data" });
-    console.log("error fetching data", error);
+    console.log(error);
+    res
+      .status(500)
+      .send({
+        message: "An error occurred while fetching Movies",
+        error: error,
+      });
+  }
+});
+app.get("/get-all-genres", async (req, res) => {
+  try {
+    const result = await getAllGenres();
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .send({
+        message: "An error occurred while fetching Movies",
+        error: error,
+      });
+  }
+});
+app.get("/get-movies-genre", async (req, res) => {
+  try {
+    const movieResult = await getMovieDb(req.query);
+    res.json(movieResult);
+  } catch (error) {
+    console.error("Error:", error);
+    res
+      .status(500)
+      .send({
+        message:
+          "An error occurred while searching the database for the genres",
+        error: error,
+      });
   }
 });
 app.post("/add-movie", async (req, res) => {
   try {
-    const db = await getDb();
-    const movie = req.body;
-    console.log("movie", movie);
-    await db.collection("movie_details").insertOne(movie);
-    res.status(200).send("OK");
+    const result = await addMovieDb(req.body);
+    console.log(result.insertedId);
+    res
+      .status(200)
+      .send({ message: "Movie added successfully", data: result.insertedId });
   } catch (error) {
-    res.status(400).json({ error });
+    console.error("Error:", error);
+    res
+      .status(500)
+      .send({
+        message: "An error occurred while adding movies to the database",
+        error: error,
+      });
+  }
+});
+app.post("/edit-movie", async (req, res) => {
+  try {
+    await editMovie(req.body);
+    res.status(200).send({ message: "Movie edited successfully" });
+  } catch (error) {
+    console.error("Error:", error);
+    res
+      .status(500)
+      .send({
+        message: "An error occurred while editing the movie on the database",
+        error: error,
+      });
   }
 });
 app.post("/review", async (req, res) => {
   try {
-    const db = await getDb();
-    const movieId = parseInt(req.query.movieId);
-    const user = parseInt(req.query.uid);
-    const likes = parseInt(req.query.likes);
-    const text = decodeURIComponent(req.query.text);
-    if (!movieId || !user || !likes || !text) {
-      res.status(400).send("no sufficient parameters");
-    }
-    const review = {
-      movieId,
-      user,
-      text,
-      likes,
-      date: new Date(),
+    await addReview(req.body);
+    res
+      .status(200)
+      .send({ message: "Movie added successfully", data: req.body });
+  } catch (error) {
+    console.error("Error:", error);
+    res
+      .status(500)
+      .send({
+        message: "An error occurred while adding reviews to the database",
+        error: error,
+      });
+  }
+});
+app.post("/review/:type/:id", async (req, res) => {
+  try {
+    const requestData = {
+      id: req.params.id,
+      text: req.body.text,
     };
-    await db.collection("reviews").insertOne(review);
-    res.status(201).send("success");
+    await manipulateReview((type = req.params.type), (data = requestData));
+    res
+      .status(200)
+      .send({ message: "Movie added successfully", data: req.body });
   } catch (error) {
-    res.status(400).json({ error });
+    console.error("Error:", error);
+    res
+      .status(500)
+      .send({
+        message: "An error occurred while manipulating the review",
+        error: error,
+      });
   }
 });
-app.post("/like-review/:id", async (req, res) => {
+app.post("/delete/:type", async (req) => {
   try {
-    const db = await getDb();
-    const id = req.params.id;
-    if (!id) {
-      res.status(400).send("no sufficient parameters");
-    }
-    const result = await db
-      .collection("reviews")
-      .findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $inc: { likes: 1 } },
-        { returnOriginal: false }
-      );
-    res.status(200).send(result);
+    const type = req.params.type;
+    await eliminate(req.body, type);
+    res
+      .status(200)
+      .send({ message: "Movie added successfully", data: req.body });
   } catch (error) {
-    res.status(500).send(error.message);
+    console.log(error);
+    res
+      .status(500)
+      .send({ message: "An error occurred while deleting", error: error });
   }
 });
-app.post("/edit-review/:id", async (req, res) => {
-  try {
-    const db = await getDb();
-    const id = req.params.id;
-    const newText = req.body.text;
-    if (!id) {
-      res.status(400).send("no sufficient parameters");
-    }
-    const result = await db
-      .collection("reviews")
-      .findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: { text: newText } },
-        { returnOriginal: false }
-      );
-    res.status(200).send(result);
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-});
+
 app.post("/set-top-movie", async (req, res) => {
   try {
-    const order = req.body;
-    const db = await getDb();
-    console.log(order.numbers);
-    if (!order) {
-      res.status(400).send("No order provided");
-      return;
-    }
-    await db
-      .collection("top5")
-      .updateOne({}, { $set: { top5: order.numbers } });
-    res.status(200).send("OK");
+    await setTopMovieDb(req.body);
+    res
+      .status(200)
+      .send({ message: "Movie added successfully", data: req.body });
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
+    console.error("Error:", error);
+    res.status(500).send({
+      message: "An error occurred while setting top movies",
+      error: error,
+    });
   }
 });
 app.get("/my-reviews/:id", async (req, res) => {
   try {
-    const db = await getDb();
-    const id = req.params.id;
-    const result = await db
-      .collection("reviews")
-      .find({ user: parseInt(id) })
-      .toArray();
-    res.status(200).json(result);
+    const reviews = await myReviewsDb(req.params.id);
+    res.json(reviews);
   } catch (error) {
-    res.status(500).send(error.message);
+    console.error("Error:", error);
+    res
+      .status(500)
+      .send({
+        message: "An error occurred while fetching user reviews",
+        error: error,
+      });
   }
 });
-
+app.get("/test", (req, res) => {
+  fetch("http://localhost:3001/delete/review", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: "664bf7ddaca2dbad0f129827",
+    }),
+  });
+});
 connectDb().then(() => {
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

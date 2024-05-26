@@ -38,7 +38,7 @@ export default function Header() {
   const size = useTheme();
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   return (
-    <header className={`${theme}${search && isMobile ? "header_col" : ""}`}>
+    <header className={`${theme}${search && isMobile ? " header_col" : ""}`}>
       <div className="header_name">
         <p>CINEMA REVIEWER</p>
       </div>

@@ -19,7 +19,7 @@ export default function Hero() {
         const response = await fetch("http://localhost:3001/top-movie");
         const data = await response.json();
         setMovies(data);
-        console.log(data);
+        console.log("top", data);
         setLoading(false);
       } catch (err) {
         console.error("Failed to fetch", err);
@@ -71,7 +71,7 @@ export default function Hero() {
               <Skeleton variant="text" height={40} />{" "}
             </>
           ) : (
-            movies[movieIndex].overview
+            movies[movieIndex].desc
           )}
         </p>
         <div className="rate_buttons">

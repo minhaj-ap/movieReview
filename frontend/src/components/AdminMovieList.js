@@ -7,6 +7,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { ThemeContext } from "../functions/ThemeContext";
 import MovieModifier from "./subComponets/movieModifier";
 
+import { useTheme, useMediaQuery, Icon } from "@mui/material";
 export default function MovieList() {
   const [movies, setMovies] = useState([]);
   const [isLoading, setLoading] = useState(true);
@@ -15,6 +16,8 @@ export default function MovieList() {
   const [formType, setFormType] = useState("");
   const [fetchNew, setFetchNew] = useState(false);
   const { theme } = useContext(ThemeContext);
+  const size = useTheme();
+  const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   useEffect(() => {
     async function fetchData() {
       try {
@@ -51,7 +54,9 @@ export default function MovieList() {
 
   return (
     <>
-      <h1 style={{ padding: "2em 1em", textAlign: "center" }}>YOUR MOVIES</h1>{" "}
+      <h1 style={{ padding: "2em 1em", textAlign: "center", color: "white" }}>
+        YOUR MOVIES
+      </h1>{" "}
       {showForm && (
         <MovieModifier
           {...formData()}
@@ -79,10 +84,13 @@ export default function MovieList() {
           </div>
         </Grid>
         {isLoading ? (
-          <div className="list_skelton">
+          <div
+            className="list_skelton"
+            style={{ width: isMobile ? "100%" : "43%" }}
+          >
             <Skeleton
               variant="rectangular"
-              width={170}
+              width="100%"
               height={230}
               sx={{ backgroundColor: "grey.900" }}
             />

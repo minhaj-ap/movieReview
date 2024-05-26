@@ -149,7 +149,7 @@ export default function MovieModifier(props) {
         component="form"
         onSubmit={handleSubmit}
       >
-        <h3>{props.type + " movie"}</h3>
+        <h3 className="form_heading admin">{props.type + " movie"}</h3>
         <Box
           display="flex"
           flexDirection={isMobile ? "column" : "row"}

@@ -1,13 +1,13 @@
 import { useState, useEffect, useContext } from "react";
-import { Skeleton, IconButton, OutlinedInput, Grid } from "@mui/material";
+import { Skeleton, IconButton, Grid } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { ThemeContext } from "../functions/ThemeContext";
-import MovieModifier from "./subComponets/movieModifier";
+import MovieModifier from "./subComponents/movieModifier";
 
-import { useTheme, useMediaQuery, Icon } from "@mui/material";
+import { useTheme, useMediaQuery } from "@mui/material";
 export default function MovieList() {
   const [movies, setMovies] = useState([]);
   const [isLoading, setLoading] = useState(true);

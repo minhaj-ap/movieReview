@@ -210,7 +210,7 @@ header.dark {
   padding-top: 15px;
 }
 /* ADMIN PAGE */
-header.admin {
+.admin.header {
   height: 3em;
   background-color: #9bbec8;
   color: white;
@@ -218,7 +218,7 @@ header.admin {
 }
 .page_admin {
   background-color: #164863;
-  height: 100vh;
+  height: max-content;
   overflow: auto;
 }
 .tableHead > * {
@@ -256,30 +256,57 @@ header.admin {
   text-transform: capitalize;
   border-bottom: 3px solid darkblue;
 }
-.admin.stats{
+.admin.stats {
   margin: 4em 2em;
   background-color: #427d9d;
   border-radius: 10px;
 }
-.admin.stats h2{
+.admin.stats h2 {
   font-size: 2rem;
   border-bottom: 2px solid;
   text-align: center;
   color: white;
   text-transform: capitalize;
 }
-.stats.item{
-  padding:1em;
+.stats.item {
+  padding: 1em;
 }
-.stat.item{
-  padding:5px;
+.stat.item {
+  padding: 5px;
 }
-.stat_heading{
+.stat_heading {
   font-size: 1.5em;
   font-weight: 800;
-  color:#F6F4EB;
+  color: #f6f4eb;
 }
-.stat_value{
+.stat_value {
   font-size: 2em;
-  color: #1B262C;
+  color: #1b262c;
+}
+.admin.footer {
+  background-color: #006769;
+  height: max-content;
+}
+.admin.footer > div {
+  padding: 1em;
+}
+.admin.footer > div h3 {
+  color: #e6ff94;
+  font-size: 2.5em;
+  margin-bottom: 1em;
+  padding-left: 10px;
+}
+.footer_actions {
+  display: flex;
+  justify-content: space-around;
+}
+.footer_link {
+  background-color: #40a578;
+  padding: 5px;
+  color: #1a4d2e;
+  font-size: 1.2rem;
+  border-radius: 3px;
+}
+.footer_link a{
+color:inherit
 }

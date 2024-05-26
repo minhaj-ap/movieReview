@@ -150,6 +150,40 @@ async function getAllGenres() {
     return error;
   }
 }
+async function getStat() {
+  try {
+    const db = await getDb();
+    const mostRatedMovie = await db
+      .collection("movie_details")
+      .find({}, { projection: { title: 1, _id: 0 } })
+      .sort({ currentRating: -1 })
+      .limit(1)
+      .toArray();
+    const leastRatedMovie = await db
+      .collection("movie_details")
+      .find({}, { projection: { title: 1, _id: 0 } })
+      .sort({ currentRating: 1 })
+      .limit(1)
+      .toArray();
+    const numberofReviews = await db.collection("reviews").countDocuments({});
+    const numberofUsers = await db.collection("users").countDocuments({});
+    const numberofMovies = await db
+      .collection("movie_details")
+      .countDocuments({});
+    const data = [
+      {
+        mostRatedMovie: mostRatedMovie[0].title,
+        leastRatedMovie: leastRatedMovie[0].title,
+        numberofReviews,
+        numberofUsers,
+        numberofMovies,
+      },
+    ];
+    return data;
+  } catch (error) {
+    return error;
+  }
+}
 module.exports = {
   searchDb,
   topFetch,
@@ -157,4 +191,5 @@ module.exports = {
   myReviewsDb,
   getAllMovie,
   getAllGenres,
+  getStat,
 };

@@ -9,6 +9,7 @@ const {
   myReviewsDb,
   getAllMovie,
   getAllGenres,
+  getStat,
 } = require("./getFunctions");
 const {
   addMovieDb,
@@ -30,12 +31,10 @@ app.get("/search", async (req, res) => {
     res.json(searchResult);
   } catch (error) {
     console.error("Error:", error);
-    res
-      .status(500)
-      .send({
-        message: "An error occurred while searching the database",
-        error: error,
-      });
+    res.status(500).send({
+      message: "An error occurred while searching the database",
+      error: error,
+    });
   }
 });
 app.get("/top-movie", async (req, res) => {
@@ -55,12 +54,10 @@ app.get("/get-movies-all", async (req, res) => {
     res.json(movieResult);
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .send({
-        message: "An error occurred while fetching Movies",
-        error: error,
-      });
+    res.status(500).send({
+      message: "An error occurred while fetching Movies",
+      error: error,
+    });
   }
 });
 app.get("/get-all-genres", async (req, res) => {
@@ -69,12 +66,10 @@ app.get("/get-all-genres", async (req, res) => {
     res.json(result);
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .send({
-        message: "An error occurred while fetching Movies",
-        error: error,
-      });
+    res.status(500).send({
+      message: "An error occurred while fetching Movies",
+      error: error,
+    });
   }
 });
 app.get("/get-movies-genre", async (req, res) => {
@@ -83,13 +78,10 @@ app.get("/get-movies-genre", async (req, res) => {
     res.json(movieResult);
   } catch (error) {
     console.error("Error:", error);
-    res
-      .status(500)
-      .send({
-        message:
-          "An error occurred while searching the database for the genres",
-        error: error,
-      });
+    res.status(500).send({
+      message: "An error occurred while searching the database for the genres",
+      error: error,
+    });
   }
 });
 app.post("/add-movie", async (req, res) => {
@@ -101,12 +93,10 @@ app.post("/add-movie", async (req, res) => {
       .send({ message: "Movie added successfully", data: result.insertedId });
   } catch (error) {
     console.error("Error:", error);
-    res
-      .status(500)
-      .send({
-        message: "An error occurred while adding movies to the database",
-        error: error,
-      });
+    res.status(500).send({
+      message: "An error occurred while adding movies to the database",
+      error: error,
+    });
   }
 });
 app.post("/edit-movie", async (req, res) => {
@@ -115,12 +105,10 @@ app.post("/edit-movie", async (req, res) => {
     res.status(200).send({ message: "Movie edited successfully" });
   } catch (error) {
     console.error("Error:", error);
-    res
-      .status(500)
-      .send({
-        message: "An error occurred while editing the movie on the database",
-        error: error,
-      });
+    res.status(500).send({
+      message: "An error occurred while editing the movie on the database",
+      error: error,
+    });
   }
 });
 app.post("/review", async (req, res) => {
@@ -131,12 +119,10 @@ app.post("/review", async (req, res) => {
       .send({ message: "Movie added successfully", data: req.body });
   } catch (error) {
     console.error("Error:", error);
-    res
-      .status(500)
-      .send({
-        message: "An error occurred while adding reviews to the database",
-        error: error,
-      });
+    res.status(500).send({
+      message: "An error occurred while adding reviews to the database",
+      error: error,
+    });
   }
 });
 app.post("/review/:type/:id", async (req, res) => {
@@ -151,12 +137,10 @@ app.post("/review/:type/:id", async (req, res) => {
       .send({ message: "Movie added successfully", data: req.body });
   } catch (error) {
     console.error("Error:", error);
-    res
-      .status(500)
-      .send({
-        message: "An error occurred while manipulating the review",
-        error: error,
-      });
+    res.status(500).send({
+      message: "An error occurred while manipulating the review",
+      error: error,
+    });
   }
 });
 app.post("/delete/:type", async (req) => {
@@ -194,12 +178,22 @@ app.get("/my-reviews/:id", async (req, res) => {
     res.json(reviews);
   } catch (error) {
     console.error("Error:", error);
-    res
-      .status(500)
-      .send({
-        message: "An error occurred while fetching user reviews",
-        error: error,
-      });
+    res.status(500).send({
+      message: "An error occurred while fetching user reviews",
+      error: error,
+    });
+  }
+});
+app.get("/stats", async (req, res) => {
+  try {
+    const result = await getStat();
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message: "An error occurred while fetching stats from server",
+      error: error,
+    });
   }
 });
 app.get("/test", (req, res) => {

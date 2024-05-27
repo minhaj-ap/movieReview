@@ -15,42 +15,41 @@ import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { storage } from "../../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 export default function MovieModifier(props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [imageUrl, setImageUrl] = useState("");
   const [image, setImage] = useState(null);
   const [imageLink, setImageLink] = useState("");
   const [options, setOptions] = useState([]);
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
+  const [upload, setUpload] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
-  const handleUpload = async (e) => {
-    if (!Image) return;
-    const storageRef = ref(storage, `images/${image.name}`);
-    try {
-      const snapshot = await uploadBytes(storageRef, image);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      const baseUrl =
-        "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
-      const relativeUrl = downloadURL.replace(baseUrl, "");
-      setImageLink(relativeUrl);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const handleImage = (e) => {
+  const handleImage = async (e) => {
+    setUpload(true);
     if (e.target.files[0]) {
       setImage(e.target.files[0]);
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      console.log(e.target.result);
-      setImageUrl(e.target.result);
-    };
-    reader.readAsDataURL(e.target.files[0]);
   };
+  const baseUrl =
+    "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
+  useEffect(() => {
+    async function uploadImage() {
+      if (!image) return;
+      try {
+        const storageRef = ref(storage, `images/${image.name}`);
+        const snapshot = await uploadBytes(storageRef, image);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        const relativeUrl = downloadURL.replace(baseUrl, "");
+        setImageLink(relativeUrl);
+        setUpload(false);
+      } catch (error) {
+        console.error(error);
+        alert(error.message);
+      }
+    }
+    uploadImage();
+  }, [image]);
   const handleTitle = (e) => {
     setTitle(e.target.value);
   };
@@ -67,6 +66,7 @@ export default function MovieModifier(props) {
   const handleReset = () => {
     setTitle("");
     setDesc("");
+    setImageLink("")
     const resetOptions = Object.fromEntries(
       Object.keys(selectedOptions).map((key) => [key, false])
     );
@@ -77,13 +77,11 @@ export default function MovieModifier(props) {
       try {
         const response = await fetch("http://localhost:3001/get-all-genres");
         const data = await response.json();
-        console.log(data);
         const initialStatus = {};
         data.forEach((option) => {
           initialStatus[option.id] = false;
         });
         setOptions(data);
-        console.log(initialStatus);
         if (props.type === "Add") {
           setSelectedOptions(initialStatus);
         }
@@ -97,30 +95,33 @@ export default function MovieModifier(props) {
       setDesc("");
     } else if (props.type === "Edit") {
       const initialStatus = {};
-      console.log(props.genre_ids);
       props.genre_ids.forEach((id) => {
         initialStatus[id.id] = true;
       });
-      console.log(initialStatus);
+      setImageLink(props.imageLink);
       setTitle(props.title);
       setDesc(props.desc);
-      console.log(initialStatus);
       setSelectedOptions(initialStatus);
     }
-  }, [props.desc, props.genre_ids, props.title, props.type]);
+  }, [props.desc, props.genre_ids, props.imageLink, props.title, props.type]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     let checkedOptions = Object.keys(selectedOptions)
       .filter((key) => selectedOptions[key])
       .map((key) => parseInt(key, 10));
     console.log(checkedOptions);
+    if (!checkedOptions.length) {
+      console.log(true);
+      alert("Please select atleast one genre");
+      return;
+    }
     const data = {
       title,
       desc,
       imageLink,
       genre_ids: checkedOptions,
     };
-    const response = await fetch(
+    await fetch(
       `http://localhost:3001/${props.type === "Add" ? "add" : "edit"}-movie`,
       {
         method: "POST",
@@ -131,11 +132,9 @@ export default function MovieModifier(props) {
       }
     )
       .then((response) => response.json())
-      .then((result) => {
-        console.log("Success:", result);
+      .then(() => {
         props.data(true);
       });
-    console.log(response);
   };
   return (
     <>
@@ -163,6 +162,7 @@ export default function MovieModifier(props) {
               label="Title"
               value={title}
               onChange={handleTitle}
+              required
             />
             <FormHelperText id="component-helper-text">
               Title of the movie
@@ -203,15 +203,16 @@ export default function MovieModifier(props) {
               placeholder="Description"
               value={desc}
               onChange={handleDesc}
+              required
             />
             <FormHelperText id="component-helper-text">
               Description of the movie
             </FormHelperText>
           </FormControl>
           <FormControl sx={{ display: "flex", flexDirection: "column" }}>
-            {imageUrl && (
+            {imageLink && (
               <img
-                src={imageUrl}
+                src={baseUrl + imageLink}
                 alt="Loading..."
                 style={{ width: "max-content", height: "max-content" }}
               />
@@ -222,6 +223,7 @@ export default function MovieModifier(props) {
                 type="file"
                 accept="image/jpeg,image/png"
                 id="image"
+                required
                 onChange={handleImage}
               />
               <IconButton>
@@ -232,17 +234,8 @@ export default function MovieModifier(props) {
                     cursor: "pointer",
                   }}
                   onClick={() => {
-                    setImageUrl("");
+                    setImageLink("");
                   }}
-                />
-              </IconButton>
-              <IconButton>
-                <CloudUploadIcon
-                  sx={{
-                    color: "grey",
-                    cursor: "pointer",
-                  }}
-                  onClick={handleUpload}
                 />
               </IconButton>
             </Box>
@@ -252,7 +245,12 @@ export default function MovieModifier(props) {
             formats)
           </FormHelperText>
           <Box display="flex" gap="1em">
-            <Button variant="contained" color="success" type="submit">
+            <Button
+              variant="contained"
+              color="success"
+              type="submit"
+              disabled={upload}
+            >
               {props.type === "Add" ? "Submit" : "Save"}
             </Button>
             <Button variant="outlined" type="reset" onClick={handleReset}>

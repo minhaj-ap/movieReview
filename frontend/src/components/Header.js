@@ -28,11 +28,10 @@ export default function Header() {
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        // Handle response data
-        console.log(data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
+        alert(error.message)
       });
   }
   const size = useTheme();

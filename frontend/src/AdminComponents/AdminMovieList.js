@@ -23,11 +23,12 @@ export default function MovieList() {
       try {
         const response = await fetch(`http://localhost:3001/get-movies-all`);
         const data = await response.json();
-        console.log(data);
+        console.log(data)
         setMovies(data);
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch", error);
+        alert(error.message)
       }
     }
     fetchData();
@@ -46,9 +47,9 @@ export default function MovieList() {
     return data;
   }
   function editForm(e) {
-    console.log(e);
     setFormType("Edit");
     setEditData(e);
+    console.log(e)
     setShowForm(true);
   }
 
@@ -103,7 +104,7 @@ export default function MovieList() {
             <Grid item xs={12} sm={6} md={4} lg={3}>
               <div className={`${theme} admin list_item items`} key={e.id}>
                 <div>
-                  <img src={e.img_path} alt="" />
+                  <img src={e.imageLink} alt="" />
                 </div>
                 <div className="list_content">
                   <h3>{e.title}</h3>

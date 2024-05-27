@@ -14,7 +14,6 @@ export default function Hero() {
   const imageUrl = "https://image.tmdb.org/t/p/original";
   useEffect(() => {
     async function fetchData() {
-      console.log("started fetch");
       try {
         const response = await fetch("http://localhost:3001/top-movie");
         const data = await response.json();

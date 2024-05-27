@@ -56,8 +56,10 @@ async function addReview(params) {
       likes,
       date: new Date(),
     };
-    await db.collection("reviews").insertOne(review);
-    return true;
+    const response = await db.collection("reviews").insertOne(review);
+
+    const result = response.insertedId;
+    return result;
   } catch (error) {
     console.log(error);
     return false;
@@ -81,12 +83,13 @@ async function manipulateReview(type, data) {
       // Handle invalid type
       return false;
     }
-    await db
+    const response = await db
       .collection("reviews")
       .findOneAndUpdate({ _id: new ObjectId(id) }, updateOperation, {
         returnOriginal: false,
       });
-    return true;
+    const result = response.insertedId;
+    return result;
   } catch (error) {
     return false;
   }
@@ -100,11 +103,25 @@ async function eliminate(id, type) {
       else return;
     };
     console.log(property(), id.id);
-    await db.collection(property()).deleteOne({ _id: new ObjectId(id.id) });
-    return true;
+    const response = await db
+      .collection(property())
+      .deleteOne({ _id: new ObjectId(id.id) });
+    const result = repsonse.insertedId;
+    return result;
   } catch (error) {
     console.log(error);
     return false;
+  }
+}
+async function createGenre(props) {
+  try {
+    const db = getDb();
+    const data = { id: props.id, name: props.name, movieIds: [] };
+    const response = await db.collection("genres").insertOne(data);
+    const result = response.insertedId;
+    return result;
+  } catch (error) {
+    return error;
   }
 }
 async function setTopMovieDb(order) {
@@ -130,4 +147,5 @@ module.exports = {
   manipulateReview,
   setTopMovieDb,
   eliminate,
+  createGenre,
 };

@@ -220,6 +220,7 @@ header.dark {
   background-color: #164863;
   height: max-content;
   overflow: auto;
+  min-height: 75vh;
 }
 .tableHead > * {
   font-weight: 900 !important;
@@ -303,10 +304,13 @@ header.dark {
 .footer_link {
   background-color: #40a578;
   padding: 5px;
-  color: #1a4d2e;
+  color: #e6ff94;
   font-size: 1.2rem;
   border-radius: 3px;
 }
-.footer_link a{
-color:inherit
+.footer_link a {
+  color: inherit;
+}
+.genre_drop {
+  margin: 4em 1em 2em;
 }

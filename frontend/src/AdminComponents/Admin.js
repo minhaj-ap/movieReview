@@ -8,11 +8,10 @@ export default function AdminPage() {
       await fetch("http://localhost:3001/stats")
         .then((res) => res.json())
         .then((data) => setData(data))
-        .catch((err) => console.log(err));
+        .catch((err) => console.error(err));
     }
     fetchData();
   }, []);
-  console.log(data);
   let result;
   if (data[0]) {
     result = [

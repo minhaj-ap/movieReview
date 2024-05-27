@@ -122,6 +122,7 @@ async function getAllMovie() {
             _id: "$_id",
             title: { $first: "$title" },
             desc: { $first: "$desc" },
+            imageLink: { $first: "$imageLink" },
             genre_ids: { $push: { id: "$genre_ids", name: "$genres.name" } },
           },
         },
@@ -130,6 +131,7 @@ async function getAllMovie() {
             _id: 1,
             title: 1,
             desc: 1,
+            imageLink: 1,
             genre_ids: 1,
           },
         },
@@ -184,6 +186,57 @@ async function getStat() {
     return error;
   }
 }
+async function getGenresWithMovie() {
+  try {
+    const db = await getDb();
+    const result = await db
+      .collection("genres")
+      .aggregate([
+        {
+          $project: {
+            name: 1,
+            id: 1,
+            movieIds: { $ifNull: ["$movieIds", []] },
+          },
+        },
+        { $unwind: { path: "$movieIds", preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: "movie_details",
+            localField: "movieIds",
+            foreignField: "_id",
+            as: "movieDetails",
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            id: { $first: "$id" },
+            name: { $first: "$name" },
+            movieDetails: {
+              $push: {
+                $cond: {
+                  if: { $eq: ["$movieDetails", []] },
+                  then: null,
+                  else: {
+                    id: "$movieIds",
+                    title: { $arrayElemAt: ["$movieDetails.title", 0] },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          $sort: { id: 1 },
+        },
+      ])
+      .toArray();
+    return result;
+  } catch (error) {
+    return error;
+  }
+}
 module.exports = {
   searchDb,
   topFetch,
@@ -192,4 +245,5 @@ module.exports = {
   getAllMovie,
   getAllGenres,
   getStat,
+  getGenresWithMovie,
 };

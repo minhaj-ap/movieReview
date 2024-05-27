@@ -10,6 +10,7 @@ const {
   getAllMovie,
   getAllGenres,
   getStat,
+  getGenresWithMovie,
 } = require("./getFunctions");
 const {
   addMovieDb,
@@ -18,6 +19,7 @@ const {
   setTopMovieDb,
   eliminate,
   editMovie,
+  createGenre,
 } = require("./postFunctions");
 require("dotenv").config();
 const app = express();
@@ -196,16 +198,44 @@ app.get("/stats", async (req, res) => {
     });
   }
 });
+app.get("/genres-with-movie", async (req, res) => {
+  try {
+    const data = await getGenresWithMovie();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message:
+        "An error occurred while fetching genres with movies from server",
+      error: error,
+    });
+  }
+});
+app.post("/add-genre", async (req, res) => {
+  try {
+    const result = await createGenre(req.body);
+    res
+      .status(200)
+      .send({ message: "Genre added successfully", result: result });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message: "An error occurred while adding genres to the database",
+      error: error,
+    });
+  }
+});
 app.get("/test", (req, res) => {
-  fetch("http://localhost:3001/delete/review", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      id: "664bf7ddaca2dbad0f129827",
-    }),
-  });
+  // fetch("http://localhost:3001/add-genre", {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify({
+  //     id: 35,
+  //     name: "Romance",
+  //   }),
+  // });
 });
 connectDb().then(() => {
   app.listen(PORT, () => {

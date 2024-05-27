@@ -21,51 +21,7 @@ async function searchDb(params) {
     throw error;
   }
 }
-async function topFetch() {
-  try {
-    const db = await getDb();
-    const result = await db
-      .collection("top5")
-      .aggregate([
-        {
-          $match: { _id: new ObjectId("664b68750c2cefd8aa192f4d") },
-        },
-        {
-          $unwind: "$top5",
-        },
-        {
-          $lookup: {
-            from: "movie_details",
-            localField: "top5",
-            foreignField: "id",
-            as: "movieDetails",
-          },
-        },
-        {
-          $unwind: "$movieDetails",
-        },
-        {
-          $project: {
-            _id: 0,
-            movieId: "$top5",
-            title: "$movieDetails.title",
-            desc: "$movieDetails.desc",
-            genre_ids: "$movieDetails.genre_ids",
-          },
-        },
-      ])
-      .toArray();
-    let cacheExpiry = 24 * 60 * 60;
-    const cachedResults = cache.get("top5");
-    if (!cachedResults && result) {
-      cache.set("top5", result, cacheExpiry);
-    }
-    return cachedResults || result;
-  } catch (error) {
-    console.error("Error searching database:", error);
-    throw error;
-  }
-}
+
 async function getMovieDb(params) {
   try {
     console.log(params);
@@ -186,7 +142,7 @@ async function getStat() {
     return error;
   }
 }
-async function getGenresWithMovie() {
+async function getFullGenresWIthMovie() {
   try {
     const db = await getDb();
     const result = await db
@@ -221,6 +177,8 @@ async function getGenresWithMovie() {
                   else: {
                     id: "$movieIds",
                     title: { $arrayElemAt: ["$movieDetails.title", 0] },
+                    desc: { $arrayElemAt: ["$movieDetails.desc", 0] },
+                    imageLink: { $arrayElemAt: ["$movieDetails.imageLink", 0] },
                   },
                 },
               },
@@ -237,13 +195,65 @@ async function getGenresWithMovie() {
     return error;
   }
 }
+async function getGenresWIthMovie() {
+  try {
+    const db = await getDb();
+    const result = await db
+      .collection("genres")
+      .aggregate([
+        {
+          $match: {
+            movieIds: { $exists: true, $ne: [] }, // Ensure movieIds exists and is not empty
+          },
+        },
+        {
+          $project: {
+            name: 1,
+            id: 1,
+            movieIds: { $ifNull: ["$movieIds", []] },
+          },
+        },
+        { $unwind: { path: "$movieIds", preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: "movie_details",
+            localField: "movieIds",
+            foreignField: "_id",
+            as: "movieDetails",
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            id: { $first: "$id" },
+            name: { $first: "$name" },
+            movieDetails: {
+              $push: {
+                id: "$movieIds",
+                title: { $arrayElemAt: ["$movieDetails.title", 0] },
+                desc: { $arrayElemAt: ["$movieDetails.desc", 0] },
+                imageLink: { $arrayElemAt: ["$movieDetails.imageLink", 0] },
+              },
+            },
+          },
+        },
+        {
+          $sort: { id: 1 },
+        },
+      ])
+      .toArray();
+    return result;
+  } catch (error) {
+    return error;
+  }
+}
 module.exports = {
   searchDb,
-  topFetch,
   getMovieDb,
   myReviewsDb,
   getAllMovie,
   getAllGenres,
   getStat,
-  getGenresWithMovie,
+  getFullGenresWIthMovie,
+  getGenresWIthMovie,
 };

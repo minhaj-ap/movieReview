@@ -1,22 +1,29 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import MovieList from "./subComponets/movieList";
 import { ThemeContext } from "../functions/ThemeContext";
 export default function List() {
   const { theme } = useContext(ThemeContext);
-  function movieList() {
-    const titles = [
-      { title: "Comedy", id: 35 },
-      { title: "Action", id: 28 },
-      { title: "Mystery", id: 9648 },
-      { title: "Romance", id: 10749 },
-    ];
-    return (
-      <div className={` list-container`}>
-        {titles.map((e) => (
-          <MovieList title={e.title} genre={e.id} key={e.id} />
-        ))}
-      </div>
-    );
-  }
-  return movieList();
+  const [movies, setMovies] = useState([]);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch(
+          `http://localhost:3001/genres-with-full-movie`
+        );
+        const data = await response.json();
+        setMovies(data);
+      } catch (error) {
+        console.error(error);
+        alert(error.message);
+      }
+    }
+    fetchData();
+  }, []);
+  return (
+    <div className={` list-container`}>
+      {movies.map((e) => (
+        <MovieList props={e} />
+      ))}
+    </div>
+  );
 }

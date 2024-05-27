@@ -124,28 +124,12 @@ async function createGenre(props) {
     return error;
   }
 }
-async function setTopMovieDb(order) {
-  try {
-    const db = await getDb();
-    console.log(order.numbers);
-    if (!order) {
-      return false;
-    }
-    await db
-      .collection("top5")
-      .updateOne({}, { $set: { top5: order.numbers } });
-    return true;
-  } catch (error) {
-    console.error(error);
-    return true;
-  }
-}
+
 module.exports = {
   addMovieDb,
   editMovie,
   addReview,
   manipulateReview,
-  setTopMovieDb,
   eliminate,
   createGenre,
 };

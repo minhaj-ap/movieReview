@@ -36,8 +36,6 @@ export default function Hero() {
       setmovieIndex(movieIndex + 1);
     }
   }
-  console.log(movies.length);
-  console.log(!movies.length);
   return (
     <div
       className="hero"
@@ -56,11 +54,6 @@ export default function Hero() {
         className="hero_content"
         style={{ fontSize: isMobile ? "1em" : "2em" }}
       >
-        {!movies.length && (
-          <p style={{ maxHeight: "max-content", fontSize: "2rem" }}>
-            We are on production stage. Movies will be added soon...
-          </p>
-        )}
         <h1 style={{ color: loading && "black" }}>
           {!0 && loading ? (
             <Skeleton variant="text" />
@@ -92,7 +85,7 @@ export default function Hero() {
       </div>
       <span className="ArrowKeys right">
         <p onClick={() => handleIndex("next")}>
-          {movieIndex < 4 && <ArrowForwardIosIcon fontSize="large" />}
+          {movieIndex < movies.length-1 && <ArrowForwardIosIcon fontSize="large" />}
         </p>
       </span>
     </div>

@@ -140,7 +140,6 @@ header.dark {
   background-color: #028391;
   color: white;
   flex-direction: column;
-  width: max-content;
   overflow-x: auto;
 }
 .list-container.dark {
@@ -155,23 +154,14 @@ header.dark {
   width: 100vw;
   overflow-x: auto;
   display: flex;
-  margin-left: 10px;
+  height: 19rem;
+}
+.list.admin{
+  height:max-content;
+  margin: auto;
 }
 .list.admin > * {
   font-family: sans-serif;
-}
-.list > * {
-  width: 170px;
-  margin-right: 20px;
-  font-family: cursive;
-  padding: 10px;
-  margin-bottom: 5px;
-}
-.list > *.light {
-  border: 2px solid black;
-}
-.list > *.dark {
-  border: 2px solid white;
 }
 .list_skelton {
   display: flex;
@@ -183,35 +173,28 @@ header.dark {
   font-size: 2em;
   width: max-content;
 }
-.list > div:nth-child(20) {
-  padding-right: 3em;
-}
-.list_item > div:last-child {
-  display: flex;
-  margin-bottom: 2em;
-}
-.list_item > div:last-child button.dark {
-  background-color: white;
-  color: maroon;
-}
-.list_item > div:last-child button.light {
-  background-color: black;
-  color: lightcoral;
-}
-.list_item > div:last-child button {
-  padding: 6px;
-  border: none;
-  border-radius: 5px;
-  display: flex;
-  font-weight: 800;
-}
-.list_content {
-  height: max-content;
+
+.list_item {
   display: flex;
   flex-direction: column;
-  margin-bottom: 1rem;
+  align-items: center;
+  background-color: #9bbec8;
+  border-radius: 10px;
+  margin: 10px;
+  padding: 10px;
+  margin-right: 2em;
+  min-width: 250px;
+  max-width: 250px;
   padding-left: 1rem;
+}
+.list_content {
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+  padding: 1rem;
   color: #1b262c;
+  width: 100%;
 }
 .list_content h3 {
   font-size: 2rem;
@@ -221,7 +204,15 @@ header.dark {
 .list_content h6 {
   font-size: 1rem;
   color: #0f4c75;
+  overflow-y: auto;
   padding-top: 15px;
+}
+.list_functions {
+  margin-bottom: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
 }
 /* ADMIN PAGE */
 .admin.header {
@@ -260,6 +251,7 @@ header.dark {
   border-radius: 10px;
   margin: 10px;
   padding: 10px;
+  height:16rem;
 }
 .admin.list_actions > * {
   color: revert-layer;

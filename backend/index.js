@@ -4,13 +4,13 @@ const bodyParser = require("body-parser");
 const { connectDb } = require("./db");
 const {
   searchDb,
-  topFetch,
   getMovieDb,
   myReviewsDb,
   getAllMovie,
   getAllGenres,
   getStat,
-  getGenresWithMovie,
+  getFullGenresWIthMovie,
+  getGenresWIthMovie,
 } = require("./getFunctions");
 const {
   addMovieDb,
@@ -39,17 +39,7 @@ app.get("/search", async (req, res) => {
     });
   }
 });
-app.get("/top-movie", async (req, res) => {
-  try {
-    const topResult = await topFetch();
-    res.json(topResult);
-  } catch (error) {
-    console.error("Error:", error);
-    res
-      .status(500)
-      .send({ message: "An error occurred while fetching Top5", error: error });
-  }
-});
+
 app.get("/get-movies-all", async (req, res) => {
   try {
     const movieResult = await getAllMovie();
@@ -160,20 +150,6 @@ app.post("/delete/:type", async (req) => {
   }
 });
 
-app.post("/set-top-movie", async (req, res) => {
-  try {
-    await setTopMovieDb(req.body);
-    res
-      .status(200)
-      .send({ message: "Movie added successfully", data: req.body });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send({
-      message: "An error occurred while setting top movies",
-      error: error,
-    });
-  }
-});
 app.get("/my-reviews/:id", async (req, res) => {
   try {
     const reviews = await myReviewsDb(req.params.id);
@@ -200,7 +176,20 @@ app.get("/stats", async (req, res) => {
 });
 app.get("/genres-with-movie", async (req, res) => {
   try {
-    const data = await getGenresWithMovie();
+    const data = await getFullGenresWIthMovie();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message:
+        "An error occurred while fetching genres with movies from server",
+      error: error,
+    });
+  }
+});
+app.get("/genres-with-full-movie", async (req, res) => {
+  try {
+    const data = await getGenresWIthMovie();
     res.status(200).json(data);
   } catch (error) {
     console.error("Error:", error);

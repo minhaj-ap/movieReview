@@ -1,30 +1,18 @@
 import { useState, useEffect, useContext } from "react";
-import { Skeleton } from "@mui/material";
-import StarHalfIcon from "@mui/icons-material/StarHalf";
+import { Skeleton, Stack, Rating, Button } from "@mui/material";
 import { ThemeContext } from "../../functions/ThemeContext";
-export default function MovieList({ title, genre }) {
-  const [movies, setMovies] = useState([]);
+import RateReviewIcon from '@mui/icons-material/RateReview';
+export default function MovieList({ props }) {
   const [isLoading, setLoading] = useState(true);
-
-  const { theme } = useContext(ThemeContext);
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await fetch(
-          `http://localhost:3001/get-movies?query=${genre}`
-        );
-        const data = await response.json();
-        setMovies(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch", error);
-      }
+    if (props) {
+      setLoading(false);
     }
-    fetchData();
-  }, [genre]);
+  }, [props]);
+  const { theme } = useContext(ThemeContext);
   return (
     <>
-      <h2>{title}</h2>{" "}
+      <h2>{props.name}</h2>{" "}
       <div className="list">
         {isLoading ? (
           <div className="list_skelton">
@@ -38,18 +26,29 @@ export default function MovieList({ title, genre }) {
             <Skeleton sx={{ backgroundColor: "grey.900" }} />
           </div>
         ) : (
-          movies &&
-          movies.map((e) => (
-            <div className={` list_item`} key={e.id}>
+          props.movieDetails &&
+          props.movieDetails.map((e) => (
+            <div className="list_item" key={e.id}>
               <div className="list_content">
                 <h3>{e.title}</h3>
-                <h6>{e.release_date}</h6>
+                <h6>{e.desc}</h6>
               </div>
-              <div>
-                <button className={theme}>
-                  Rate Now
-                  <StarHalfIcon fontSize="small" />
-                </button>
+              <div className="list_functions">
+                <Stack spacing={1}>
+                  <Rating
+                    name="half-rating-read"
+                    defaultValue={2.5}
+                    precision={0.5}
+                    readOnly
+                  />
+                </Stack>
+                <Button
+                  variant="contained"
+                  endIcon={<RateReviewIcon fontSize="small" />}
+                  sx={{ backgroundColor: "#028391" }}
+                >
+                  Post Your Review
+                </Button>
               </div>
             </div>
           ))

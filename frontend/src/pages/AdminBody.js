@@ -30,8 +30,8 @@ export default function AdminBody() {
                 </Link>
               </Grid>
               <Grid item xs={12} sm={4} md={3} className="footer_link">
-                <Link to="/admin/top5">
-                  <p>/top5</p>
+                <Link to="/admin/users-and-reviews">
+                  <p>/users-and-reviews</p>
                 </Link>
               </Grid>
             </Grid>

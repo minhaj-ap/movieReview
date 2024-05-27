@@ -11,7 +11,7 @@ export default function List() {
       { title: "Romance", id: 10749 },
     ];
     return (
-      <div className={`${theme} list-container`}>
+      <div className={` list-container`}>
         {titles.map((e) => (
           <MovieList title={e.title} genre={e.id} key={e.id} />
         ))}

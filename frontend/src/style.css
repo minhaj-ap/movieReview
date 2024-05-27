@@ -1,3 +1,12 @@
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
 * {
   padding: 0;
   margin: 0;
@@ -12,6 +21,8 @@ header {
   align-items: center;
   z-index: 1;
   justify-content: space-around;
+  background-color: #01204e;
+  color: white;
 }
 header.light {
   background-color: white;
@@ -27,7 +38,6 @@ header.dark {
 .header_name {
   font-size: 1.5rem;
   padding-left: 5px;
-  color: red;
   font-family: "Oswald", sans-serif;
   font-optical-sizing: auto;
   font-weight: 600;
@@ -49,6 +59,7 @@ header.dark {
   display: flex;
   padding: 5px;
   margin: 3px 0;
+  border-radius: 10px;
 }
 .header_form input {
   padding: 5px;
@@ -70,6 +81,7 @@ header.dark {
   align-items: flex-end;
   background-size: cover;
 }
+
 .hero_content {
   height: 100%;
   margin: 1.5em;
@@ -125,6 +137,8 @@ header.dark {
 .list-container {
   padding: 20px;
   display: flex;
+  background-color: #028391;
+  color: white;
   flex-direction: column;
   width: max-content;
   overflow-x: auto;

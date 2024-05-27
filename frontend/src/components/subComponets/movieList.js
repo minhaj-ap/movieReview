@@ -40,7 +40,7 @@ export default function MovieList({ title, genre }) {
         ) : (
           movies &&
           movies.map((e) => (
-            <div className={`${theme} list_item`} key={e.id}>
+            <div className={` list_item`} key={e.id}>
               <div className="list_content">
                 <h3>{e.title}</h3>
                 <h6>{e.release_date}</h6>

@@ -11,15 +11,17 @@ export default function Hero() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [movieIndex, setmovieIndex] = useState(0);
-  const imageUrl = "https://image.tmdb.org/t/p/original";
+  const imageUrl =
+    "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch("http://localhost:3001/top-movie");
+        const response = await fetch("http://localhost:3001/get-movies-all");
         const data = await response.json();
-        setMovies(data);
-        console.log("top", data);
-        setLoading(false);
+        if (data[0]) {
+          setLoading(false);
+          setMovies(data);
+        }
       } catch (err) {
         console.error("Failed to fetch", err);
         alert("Failed to fetch");
@@ -27,25 +29,21 @@ export default function Hero() {
     }
     fetchData();
   }, []);
-  useEffect(() => {
-    if (movies) {
-      console.log(movies);
-    }
-  }, [movies]);
   function handleIndex(state) {
-    console.log(movieIndex);
     if (state === "prev") {
       setmovieIndex(movieIndex - 1);
     } else {
       setmovieIndex(movieIndex + 1);
     }
   }
+  console.log(movies.length);
+  console.log(!movies.length);
   return (
     <div
       className="hero"
       style={{
         backgroundImage: `url(${
-          loading ? " " : imageUrl + movies[movieIndex].backdrop_path
+          loading ? " " : imageUrl + movies[movieIndex].imageLink
         })`,
       }}
     >
@@ -58,14 +56,22 @@ export default function Hero() {
         className="hero_content"
         style={{ fontSize: isMobile ? "1em" : "2em" }}
       >
+        {!movies.length && (
+          <p style={{ maxHeight: "max-content", fontSize: "2rem" }}>
+            We are on production stage. Movies will be added soon...
+          </p>
+        )}
         <h1 style={{ color: loading && "black" }}>
-          {loading ? <Skeleton variant="text" /> : movies[movieIndex].title}
+          {!0 && loading ? (
+            <Skeleton variant="text" />
+          ) : (
+            movies[movieIndex].title
+          )}
         </h1>
         <p>
-          {loading ? (
+          {!movies.length && loading ? (
             <>
               {" "}
-              <Skeleton variant="text" height={40} />{" "}
               <Skeleton variant="text" height={40} />{" "}
               <Skeleton variant="text" height={40} />{" "}
             </>

@@ -1,25 +1,41 @@
-import {
-  FormControl,
-  TextField,
-  Button,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import { FormControl, Button, useMediaQuery, useTheme } from "@mui/material";
 import { useState } from "react";
+import CustomTextField from "./CustomTextFieldForLogin";
 export default function UserLogin() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [registerActive, setRegisterActive] = useState("active");
-  const [LoginActive, setLoginActive] = useState("");
+  const [ActiveOption, setActiveOption] = useState(1);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
   function switchOption(type) {
     if (type === "register") {
-      setRegisterActive("active");
-      setLoginActive("");
+      setActiveOption(1);
     } else if (type === "login") {
-      setLoginActive("active");
-      setRegisterActive("");
+      setActiveOption(2);
     }
   }
+  const handleName = (e) => {
+    setName(e.target.value);
+  };
+  const handleEmail = (e) => {
+    setEmail(e.target.value);
+  };
+  const handlePass = (e) => {
+    setPass(e.target.value);
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (ActiveOption === 1) {
+      console.log({
+        name: name,
+        email: email,
+        password: pass,
+      });
+    } else if (ActiveOption === 2) {
+      console.log({ email: email, password: pass });
+    }
+  };
   return (
     <div className="login_container">
       <div
@@ -35,7 +51,7 @@ export default function UserLogin() {
         </h2>
         <div className="login_options">
           <div
-            className={`login_option_1 ${registerActive}`}
+            className={`login_option_1 ${ActiveOption === 1 && "active"}`}
             onClick={() => {
               switchOption("register");
             }}
@@ -43,7 +59,7 @@ export default function UserLogin() {
             <p>Register</p>
           </div>
           <div
-            className={`login_option_2 ${LoginActive}`}
+            className={`login_option_2 ${ActiveOption === 2 && "active"}`}
             onClick={() => {
               switchOption("login");
             }}
@@ -51,43 +67,52 @@ export default function UserLogin() {
             <p>Login</p>
           </div>
         </div>
-        <div
-          className={`login_form ${LoginActive ? "right" : "left"}`}
-          component="form"
+        <form
+          onSubmit={handleSubmit}
+          className={`login_form ${ActiveOption === 1 ? "left" : "right"}`}
         >
-          {registerActive && (
+          {ActiveOption === 1 && (
             <FormControl defaultValue="" required>
               <label>Name</label>
-              <TextField
+              <CustomTextField
                 placeholder="Write your name here"
-                sx={{ color: "white" }}
+                value={name}
+                onChange={handleName}
               />
             </FormControl>
           )}
           <FormControl defaultValue="" required>
             <label>Email</label>
-            <TextField
+            <CustomTextField
               placeholder="Write your Email here"
               type="email"
               sx={{ color: "white" }}
+              value={email}
+              onChange={handleEmail}
             />
           </FormControl>{" "}
           <FormControl defaultValue="" required>
             <label>Password</label>
-            <TextField
+            <CustomTextField
               placeholder="Write your password here"
               sx={{ color: "white" }}
               type="password"
+              value={pass}
+              onChange={handlePass}
             />
           </FormControl>
           <FormControl>
-            {LoginActive ? (
-              <Button variant="contained" type="submit">LOGIN</Button>
+            {ActiveOption === 1 ? (
+              <Button variant="contained" type="submit">
+                Register
+              </Button>
             ) : (
-              <Button variant="contained" type="submit">Register</Button>
+              <Button variant="contained" type="submit">
+                Login
+              </Button>
             )}
           </FormControl>
-        </div>
+        </form>
       </div>
     </div>
   );

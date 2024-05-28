@@ -1,5 +1,6 @@
 const { getDb } = require("./db");
 const { ObjectId } = require("mongodb");
+const bcrypt = require("bcrypt");
 async function addMovieDb(params) {
   try {
     const db = await getDb();
@@ -124,7 +125,53 @@ async function createGenre(props) {
     return error;
   }
 }
+async function addUser(props) {
+  const password = props.password;
+  const name = props.name;
+  const email = props.email;
 
+  const hashedPassword = await bcrypt.hash(password, 5);
+  try {
+    const db = getDb();
+    const response = await db.collection("users").insertOne({
+      name,
+      email,
+      password: hashedPassword,
+    });
+    const result = response.insertedId;
+    return result;
+  } catch (error) {
+    return error;
+  }
+}
+async function loginUser(props){
+  const email = props.email;
+  const password = props.password;
+  try {
+    const db = getDb();
+    const user = await db.collection("users").findOne({ email });
+    if (!user) {
+      return false;
+    }
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return false;
+    }
+    return user;
+  } catch (error) {
+    return error;
+  }
+}
+async function loginAdmin(props) {
+  const pass = props.password
+  try {
+    const db= getDb()
+    const result = await db.collection('admin').findOne({ pass: pass})
+    return result
+  } catch (error) {
+    return error
+  }
+}
 module.exports = {
   addMovieDb,
   editMovie,
@@ -132,4 +179,7 @@ module.exports = {
   manipulateReview,
   eliminate,
   createGenre,
+  addUser,
+  loginUser,
+  loginAdmin
 };

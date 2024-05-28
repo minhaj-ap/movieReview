@@ -1,7 +1,7 @@
 const { getDb } = require("./db");
 const { ObjectId } = require("mongodb");
 const nodeCache = require("node-cache");
-
+const bcrypt = require('bcrypt');
 const cache = new nodeCache({ stdTTL: 0, checkperiod: 60 });
 async function searchDb(params) {
   try {

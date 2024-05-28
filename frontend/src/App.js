@@ -7,7 +7,7 @@ import MovieList from "./AdminComponents/AdminMovieList";
 import TotalUserAndReviews from "./AdminComponents/AdminTopMovies";
 import GenresClassify from "./AdminComponents/AdminGenresClassify";
 import AdminBody from "./pages/AdminBody";
-import UserLogin from "./pages/UserLogin";
+import UserLogin from "./LoginPage";
 function App() {
   return (
     <ThemeProvider>

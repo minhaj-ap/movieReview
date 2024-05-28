@@ -20,6 +20,9 @@ const {
   eliminate,
   editMovie,
   createGenre,
+  addUser,
+  loginUser,
+  loginAdmin,
 } = require("./postFunctions");
 require("dotenv").config();
 const app = express();
@@ -214,15 +217,54 @@ app.post("/add-genre", async (req, res) => {
     });
   }
 });
+app.post("/signup", async (req, res) => {
+  try {
+    const result = await addUser(req.body);
+    res
+      .status(200)
+      .send({ message: "Successfully registered", result: result });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message: "An error occurred while adding user to the database",
+      error: error,
+    });
+  }
+});
+app.post("/login", async (req, res) => {
+  try {
+    const result = await loginUser(req.body);
+    res.status(200).send({ message: "Success", result: result });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message: "An error occurred while logging in",
+      error: error,
+    });
+  }
+});
+app.post("/admin-login", async (req, res) => {
+  try {
+    const result = await loginAdmin(req.body);
+    res.status(200).send({ message: "Success", result: result });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message: "An error occurred while logging.",
+      error: error,
+    });
+  }
+});
 app.get("/test", (req, res) => {
-  // fetch("http://localhost:3001/add-genre", {
+  // fetch("http://localhost:3001/signup", {
   //   method: "POST",
   //   headers: {
   //     "Content-Type": "application/json",
   //   },
   //   body: JSON.stringify({
-  //     id: 35,
-  //     name: "Romance",
+  //     name: "",
+  //     password: "235wsr",
+  //     email: "",
   //   }),
   // });
 });

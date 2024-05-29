@@ -363,6 +363,67 @@ async function getFullDetailMovieAndReviews(id) {
     return error;
   }
 }
+async function getUsersReviews(id) {
+  try {
+    const db = getDb();
+    const result = db
+      .collection("users")
+      .aggregate([
+        {
+          $match: { _id: new ObjectId(id) }, // Replace with the user's ObjectId
+        },
+        {
+          $lookup: {
+            from: "reviews",
+            localField: "_id",
+            foreignField: "userId",
+            as: "userReviews",
+          },
+        },
+        {
+          $unwind: "$userReviews",
+        },
+        {
+          $lookup: {
+            from: "movie_details",
+            localField: "userReviews._id", // Assuming reviews contain movieI
+            foreignField: "reviewIds",
+            as: "movieDetails",
+          },
+        },
+        {
+          $unwind: "$movieDetails",
+        },
+        {
+          $group: {
+            _id: "$_id",
+            name: { $first: "$name" },
+            email: { $first: "$email" },
+            reviews: {
+              $push: {
+                review: "$userReviews.review",
+                movie: {
+                  title: "$movieDetails.title",
+                },
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            email: 1,
+            reviews: 1,
+          },
+        },
+      ])
+      .toArray();
+    return result;
+  } catch (error) {
+    return error;
+  }
+}
 module.exports = {
   searchDb,
   getMovieDb,
@@ -373,4 +434,5 @@ module.exports = {
   getFullGenresWIthMovie,
   getGenresWIthMovie,
   getFullDetailMovieAndReviews,
+  getUsersReviews,
 };

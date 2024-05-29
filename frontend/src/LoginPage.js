@@ -1,8 +1,12 @@
 import { FormControl, Button, useMediaQuery, useTheme } from "@mui/material";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import CustomTextField from "./CustomTextFieldForLogin";
-export default function UserLogin() {
+import { AuthContext } from "./functions/AuthContext";
+import { AdminAuthContext } from "./functions/AdminAuthContext";
+export default function Login({ type }) {
   const theme = useTheme();
+  const { login } = useContext(AuthContext);
+  const { adminLogin } = useContext(AdminAuthContext);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [ActiveOption, setActiveOption] = useState(1);
   const [name, setName] = useState("");
@@ -24,16 +28,101 @@ export default function UserLogin() {
   const handlePass = (e) => {
     setPass(e.target.value);
   };
+  function resetData() {
+    setName("");
+    setEmail("");
+    setPass("");
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (ActiveOption === 1) {
-      console.log({
-        name: name,
-        email: email,
-        password: pass,
-      });
-    } else if (ActiveOption === 2) {
-      console.log({ email: email, password: pass });
+    if (type === "user") {
+      if (ActiveOption === 1) {
+        const data = {
+          name: name,
+          email: email,
+          password: pass,
+        };
+        await fetch("http://localhost:3001/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => {
+            return response.json().then((data) => {
+              if (!response.ok) {
+                alert(data.message);
+                resetData();
+              }
+              return data;
+            });
+          })
+          .then((data) => {
+            console.log(data);
+            if (data.message === "Success") {
+              login(name);
+              resetData();
+            }
+          });
+      } else if (ActiveOption === 2) {
+        const data = { email: email, password: pass };
+        await fetch("http://localhost:3001/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              alert("Invalid Credentials");
+              resetData();
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            if (data.message === "Success") {
+              login(data.result.name);
+              resetData();
+              // window.location.reload();
+            } else {
+              alert("Invalid Credentials");
+            }
+          })
+          .catch((error) => {
+            console.error(
+              "There was a problem with the fetch operation:",
+              error
+            );
+          });
+      }
+    } else if (type === "admin") {
+      const data = { password: pass };
+      await fetch("http://localhost:3001/admin-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((response) => {
+          return response.json().then((data) => {
+            if (!response.ok) {
+              alert("Invalid Credentials");
+              resetData();
+            }
+            return data;
+          });
+        })
+        .then((data) => {
+          if (data.message === "Success") {
+            adminLogin();
+            resetData();
+          }
+        });
     }
   };
   return (
@@ -45,33 +134,44 @@ export default function UserLogin() {
         }}
       >
         <h2
-          style={{ color: "white", marginBottom: "1em", textAlign: "center" }}
+          style={{
+            color: "white",
+            marginBottom: "1em",
+            textTransform: "uppercase",
+            textAlign: "center",
+          }}
         >
-          USER LOGIN
+          {type} LOGIN
         </h2>
         <div className="login_options">
-          <div
-            className={`login_option_1 ${ActiveOption === 1 && "active"}`}
-            onClick={() => {
-              switchOption("register");
-            }}
-          >
-            <p>Register</p>
-          </div>
-          <div
-            className={`login_option_2 ${ActiveOption === 2 && "active"}`}
-            onClick={() => {
-              switchOption("login");
-            }}
-          >
-            <p>Login</p>
-          </div>
+          {type === "user" ? (
+            <>
+              <div
+                className={`login_option_1 ${ActiveOption === 1 && "active"}`}
+                onClick={() => {
+                  switchOption("register");
+                }}
+              >
+                <p>Register</p>
+              </div>
+              <div
+                className={`login_option_2 ${ActiveOption === 2 && "active"}`}
+                onClick={() => {
+                  switchOption("login");
+                }}
+              >
+                <p>Login</p>
+              </div>
+            </>
+          ) : (
+            <div></div>
+          )}
         </div>
         <form
           onSubmit={handleSubmit}
           className={`login_form ${ActiveOption === 1 ? "left" : "right"}`}
         >
-          {ActiveOption === 1 && (
+          {type === "user" && ActiveOption === 1 && (
             <FormControl defaultValue="" required>
               <label>Name</label>
               <CustomTextField
@@ -81,32 +181,58 @@ export default function UserLogin() {
               />
             </FormControl>
           )}
-          <FormControl defaultValue="" required>
-            <label>Email</label>
-            <CustomTextField
-              placeholder="Write your Email here"
-              type="email"
-              sx={{ color: "white" }}
-              value={email}
-              onChange={handleEmail}
-            />
-          </FormControl>{" "}
-          <FormControl defaultValue="" required>
-            <label>Password</label>
-            <CustomTextField
-              placeholder="Write your password here"
-              sx={{ color: "white" }}
-              type="password"
-              value={pass}
-              onChange={handlePass}
-            />
-          </FormControl>
+          {type === "user" && (
+            <>
+              <FormControl defaultValue="" required>
+                <label>Email</label>
+                <CustomTextField
+                  placeholder="Write your Email here"
+                  type="email"
+                  sx={{ color: "white" }}
+                  value={email}
+                  onChange={handleEmail}
+                />
+              </FormControl>{" "}
+              <FormControl defaultValue="" required>
+                <label>Password</label>
+                <CustomTextField
+                  placeholder="Write your password here"
+                  sx={{ color: "white" }}
+                  type="password"
+                  value={pass}
+                  onChange={handlePass}
+                />
+              </FormControl>
+            </>
+          )}
+          {type !== "user" && (
+            <div>
+              {" "}
+              <FormControl defaultValue="" required>
+                <label>Enter your code</label>
+                <CustomTextField
+                  placeholder="Write your Code here"
+                  sx={{ color: "white" }}
+                  type="password"
+                  value={pass}
+                  onChange={handlePass}
+                />
+              </FormControl>
+            </div>
+          )}
+
           <FormControl>
-            {ActiveOption === 1 ? (
+            {type === "user" && ActiveOption === 1 && (
               <Button variant="contained" type="submit">
                 Register
               </Button>
-            ) : (
+            )}
+            {type === "user" && ActiveOption === 2 && (
+              <Button variant="contained" type="submit">
+                Login
+              </Button>
+            )}
+            {type === "admin" && (
               <Button variant="contained" type="submit">
                 Login
               </Button>

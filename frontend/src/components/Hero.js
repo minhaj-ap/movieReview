@@ -55,14 +55,10 @@ export default function Hero() {
         style={{ fontSize: isMobile ? "1em" : "2em" }}
       >
         <h1 style={{ color: loading && "black" }}>
-          {!0 && loading ? (
-            <Skeleton variant="text" />
-          ) : (
-            movies[movieIndex].title
-          )}
+          {loading ? <Skeleton variant="text" /> : movies[movieIndex].title}
         </h1>
         <p>
-          {!movies.length && loading ? (
+          {loading ? (
             <>
               {" "}
               <Skeleton variant="text" height={40} />{" "}
@@ -85,7 +81,9 @@ export default function Hero() {
       </div>
       <span className="ArrowKeys right">
         <p onClick={() => handleIndex("next")}>
-          {movieIndex < movies.length-1 && <ArrowForwardIosIcon fontSize="large" />}
+          {movieIndex < movies.length - 1 && (
+            <ArrowForwardIosIcon fontSize="large" />
+          )}
         </p>
       </span>
     </div>

@@ -1,6 +1,12 @@
 import { Outlet, Link } from "react-router-dom";
 import Grid from "@mui/material/Grid";
+import { useContext } from "react";
+import { AdminAuthContext } from "../functions/AdminAuthContext";
 export default function AdminBody() {
+  const { adminLogout } = useContext(AdminAuthContext);
+  function handleLogout() {
+    adminLogout();
+  }
   return (
     <>
       <header className="admin header">
@@ -32,6 +38,11 @@ export default function AdminBody() {
               <Grid item xs={12} sm={4} md={3} className="footer_link">
                 <Link to="/admin/users-and-reviews">
                   <p>/users-and-reviews</p>
+                </Link>
+              </Grid>
+              <Grid item xs={12} sm={4} md={3} className="footer_link">
+                <Link onClick={() => handleLogout()}>
+                  <p>/logout</p>
                 </Link>
               </Grid>
             </Grid>

@@ -6,9 +6,12 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useContext, useState } from "react";
 import { useTheme, useMediaQuery, Icon } from "@mui/material";
 import { ThemeContext } from "../functions/ThemeContext";
+import { AuthContext } from "../functions/AuthContext";
 export default function Header() {
   const [isDark, setisDark] = useState(false);
   const { toggleTheme } = useContext(ThemeContext);
+
+  const { isLoggedIn } = useContext(AuthContext);
   const [search, setSearch] = useState(false);
   function handleSearch() {
     setSearch((prev) => !prev);
@@ -18,6 +21,7 @@ export default function Header() {
     setisDark((prev) => !prev);
   }
   const { theme } = useContext(ThemeContext);
+  console.log(theme);
   function searchFunc(e) {
     e.preventDefault();
     const searchTerm = document.getElementById("searchInput").value;
@@ -27,18 +31,17 @@ export default function Header() {
     // Make request using fetch
     fetch(url)
       .then((response) => response.json())
-      .then((data) => {
-      })
+      .then((data) => {})
       .catch((error) => {
         console.error("Error fetching data:", error);
-        alert(error.message)
+        alert(error.message);
       });
   }
   const size = useTheme();
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   return (
     <header className={`${search && isMobile ? " header_col" : ""}`}>
-      <div className="header_name">
+      <div className={`${isLoggedIn && "admin"} header_name`}>
         <p>CINEMA REVIEWER</p>
       </div>
       {search ? (

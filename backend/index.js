@@ -24,6 +24,7 @@ const {
   loginUser,
   loginAdmin,
 } = require("./postFunctions");
+const { deleteMovie } = require("./deleteFunctions");
 require("dotenv").config();
 const app = express();
 const PORT = 3001;
@@ -220,9 +221,14 @@ app.post("/add-genre", async (req, res) => {
 app.post("/signup", async (req, res) => {
   try {
     const result = await addUser(req.body);
-    res
-      .status(200)
-      .send({ message: "Successfully registered", result: result });
+    if (result) {
+      res.status(200).json({ message: "Success", result: result });
+    } else {
+      res.status(404).json({
+        message: "User already exists with this email",
+        result: result,
+      });
+    }
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({
@@ -234,7 +240,12 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     const result = await loginUser(req.body);
-    res.status(200).send({ message: "Success", result: result });
+    console.log(result);
+    if (result) {
+      res.status(200).json({ message: "Success", result: result });
+    } else {
+      res.status(404).json({ message: "Invalid Credentials", result: result });
+    }
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({
@@ -253,6 +264,19 @@ app.post("/admin-login", async (req, res) => {
       message: "An error occurred while logging.",
       error: error,
     });
+  }
+});
+app.delete("/delete-movie/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    const result = await deleteMovie(id);
+    if (result.modifiedCount === 1) {
+      res.status(200).json({ message: "Movie deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Movie not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error });
   }
 });
 app.get("/test", (req, res) => {

@@ -1,12 +1,23 @@
 import Header from "../components/Header";
 import Hero from "../components/Hero";
 import List from "../components/List";
-export default function UserPage(){
-    return(
+import { useContext } from "react";
+import { AuthContext } from "../functions/AuthContext";
+import Login from "../LoginPage";
+export default function UserPage() {
+  const { isLoggedIn } = useContext(AuthContext);
+  console.log(isLoggedIn)
+  return (
+    <>
+      {isLoggedIn ? (
         <div className="page_user">
-            <Header />
-            <Hero />
-            <List />
+          <Header />
+          <Hero />
+          <List />
         </div>
-    )
+      ) : (
+        <Login type="user" />
+      )}
+    </>
+  );
 }

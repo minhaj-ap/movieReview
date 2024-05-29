@@ -8,6 +8,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material/";
+import { Link } from "react-router-dom";
 import { IconButton, OutlinedInput, Grid } from "@mui/material";
 import { useState, useEffect } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -66,7 +67,7 @@ export default function MovieModifier(props) {
   const handleReset = () => {
     setTitle("");
     setDesc("");
-    setImageLink("")
+    setImageLink("");
     const resetOptions = Object.fromEntries(
       Object.keys(selectedOptions).map((key) => [key, false])
     );
@@ -174,25 +175,43 @@ export default function MovieModifier(props) {
               alignItems: "flex-start",
             }}
           >
-            <Grid item xs={6} sm={4}>
-              {options.map((e) => (
-                <FormControlLabel
-                  value="start"
-                  control={
-                    <Checkbox
-                      checked={selectedOptions[e.id] || false}
-                      onChange={handleChange}
-                      name={e.id.toString()}
-                    />
-                  }
-                  label={e.name}
-                  labelPlacement="start"
-                />
-              ))}
+            <Grid item xs={6} sm={4} sx={{ width: "100%" }}>
+              {options.length ? (
+                options.map((e,index) => (
+                  <FormControlLabel
+                    value="start"
+                    key="index"
+                    control={
+                      <Checkbox
+                        checked={selectedOptions[e.id] || false}
+                        onChange={handleChange}
+                        name={e.id.toString()}
+                      />
+                    }
+                    label={e.name}
+                    labelPlacement="start"
+                  />
+                ))
+              ) : (
+                <div
+                  className="non_genre_link"
+                  style={{
+                    margin: `${isMobile ? "0 0 10px 0" : "0 0 0 10px"}`,
+                  }}
+                >
+                  <Link to="/admin/your-genres">
+                    <p>Click here to add genres</p>
+                  </Link>
+                </div>
+              )}
             </Grid>
-            <FormHelperText id="component-helper-text">
-              Choose Genres
-            </FormHelperText>
+            {options.length ? (
+              <FormHelperText id="component-helper-text">
+                Choose Genres
+              </FormHelperText>
+            ) : (
+              ""
+            )}
           </FormControl>
         </Box>
         <Box display="flex" flexDirection="column">

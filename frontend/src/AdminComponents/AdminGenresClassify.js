@@ -14,7 +14,7 @@ import { useTheme, useMediaQuery } from "@mui/material";
 function GenresClassify() {
   const [expanded, setExpanded] = useState(false);
   const [genres, setGenres] = useState([]);
-  const [genreId, setGenreId] = useState("");
+  const [genreId, setGenreId] = useState(30);
   const [genreName, setGenreName] = useState("");
   const [Fetch, setFetch] = useState(null);
   const size = useTheme();

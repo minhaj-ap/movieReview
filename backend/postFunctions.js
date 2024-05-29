@@ -133,18 +133,23 @@ async function addUser(props) {
   const hashedPassword = await bcrypt.hash(password, 5);
   try {
     const db = getDb();
-    const response = await db.collection("users").insertOne({
-      name,
-      email,
-      password: hashedPassword,
-    });
-    const result = response.insertedId;
-    return result;
+    const userExists = await db.collection("users").findOne({ email: email });
+    if (userExists) {
+      return false;
+    } else {
+      const response = await db.collection("users").insertOne({
+        name,
+        email,
+        password: hashedPassword,
+      });
+      const result = response.insertedId;
+      return result;
+    }
   } catch (error) {
     return error;
   }
 }
-async function loginUser(props){
+async function loginUser(props) {
   const email = props.email;
   const password = props.password;
   try {
@@ -163,15 +168,16 @@ async function loginUser(props){
   }
 }
 async function loginAdmin(props) {
-  const pass = props.password
+  const pass = props.password;
   try {
-    const db= getDb()
-    const result = await db.collection('admin').findOne({ pass: pass})
-    return result
+    const db = getDb();
+    const result = await db.collection("admin").findOne({ pass: pass });
+    return result;
   } catch (error) {
-    return error
+    return error;
   }
 }
+
 module.exports = {
   addMovieDb,
   editMovie,
@@ -181,5 +187,5 @@ module.exports = {
   createGenre,
   addUser,
   loginUser,
-  loginAdmin
+  loginAdmin,
 };

@@ -52,7 +52,25 @@ export default function MovieList() {
     console.log(e);
     setShowForm(true);
   }
-
+  async function deleteMovie(e) {
+    console.log("triggered")
+    const response = await fetch(
+      `http://localhost:3001/delete-movie/${e._id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-type": "application/json",
+        },
+      }
+    );
+    console.log(response)
+    if (response.ok) {
+      setFetchNew(true);
+    } else {
+      const error = await response.json();
+      alert(error.message);
+    }
+  }
   return (
     <>
       <h1 style={{ padding: "2em 1em", textAlign: "center", color: "white" }}>
@@ -67,7 +85,14 @@ export default function MovieList() {
         />
       )}
       <Grid container spacing={2} className="list admin">
-        <Grid item xs={12} sm={6} md={4} lg={3}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={4}
+          lg={3}
+          sx={{ display: "grid", placeContent: "center" }}
+        >
           <div className={` list_item add_button`} onClick={() => handleForm}>
             <AddCircleIcon
               fontSize="large"
@@ -118,7 +143,11 @@ export default function MovieList() {
                   <IconButton>
                     <BarChartIcon />
                   </IconButton>
-                  <IconButton>
+                  <IconButton
+                    onClick={() => {
+                      deleteMovie(e);
+                    }}
+                  >
                     <DeleteIcon />
                   </IconButton>
                 </div>

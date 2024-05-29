@@ -1,7 +1,7 @@
 import Grid from "@mui/material/Grid";
 import { useEffect } from "react";
 import { useState } from "react";
-export default function AdminPage() {
+export default function AdminHome() {
   const [data, setData] = useState([]);
   const [noOfMovies, setNoOfMovies] = useState();
   const [noOfReviews, setNoOfReviews] = useState();

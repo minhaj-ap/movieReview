@@ -51,7 +51,7 @@ export default function AdminHome() {
       <h2>STATS</h2>
       <Grid container className="stats item">
         {result &&
-          result.map((e,index) => (
+          result.map((e, index) => (
             <Grid item xs={12} sm={4} md={3} gap={4} key={index}>
               <div className="stat item">
                 <p className="stat_heading">{e.title}</p>

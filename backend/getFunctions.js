@@ -1,7 +1,7 @@
 const { getDb } = require("./db");
 const { ObjectId } = require("mongodb");
 const nodeCache = require("node-cache");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const cache = new nodeCache({ stdTTL: 0, checkperiod: 60 });
 async function searchDb(params) {
   try {
@@ -247,6 +247,122 @@ async function getGenresWIthMovie() {
     return error;
   }
 }
+async function getFullDetailMovieAndReviews(id) {
+  try {
+    const db = getDb();
+    await db.collection("movie_details").updateMany({}, [
+      {
+        $set: {
+          reviewIds: {
+            $map: {
+              input: "$reviewIds",
+              as: "id",
+              in: { $toObjectId: "$$id" },
+            },
+          },
+        },
+      },
+    ]);
+    await db.collection("reviews").updateMany({}, [
+      {
+        $set: {
+          userId: { $toObjectId: "$userId" },
+        },
+      },
+    ]);
+    const result = await db
+      .collection("movie_details")
+      .aggregate([
+        { $match: { _id: new ObjectId(id) } },
+        {
+          $lookup: {
+            from: "genres",
+            localField: "genre_ids",
+            foreignField: "id",
+            as: "genreDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "reviews",
+            localField: "reviewIds",
+            foreignField: "_id",
+            as: "reviewDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "reviewDetails.userId",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        {
+          $addFields: {
+            combinedReviews: {
+              $map: {
+                input: "$reviewDetails",
+                as: "review",
+                in: {
+                  review: "$$review.review",
+                  userId: "$$review.userId",
+                  userName: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$userDetails",
+                          as: "user",
+                          cond: { $eq: ["$$user._id", "$$review.userId"] },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            desc: 1,
+            imageLink: 1,
+            currentRating: 1,
+            NoOfRatings: 1,
+            "genreDetails.id": 1,
+            "genreDetails.name": 1,
+            combinedReviews: {
+              review: 1,
+              userId: 1,
+              "userName.name": 1,
+            },
+          },
+        },
+        {
+          $addFields: {
+            combinedReviews: {
+              $map: {
+                input: "$combinedReviews",
+                as: "cr",
+                in: {
+                  review: "$$cr.review",
+                  userId: "$$cr.userId",
+                  userName: "$$cr.userName.name",
+                },
+              },
+            },
+          },
+        },
+      ])
+      .toArray();
+    return result;
+  } catch (error) {
+    return error;
+  }
+}
 module.exports = {
   searchDb,
   getMovieDb,
@@ -256,4 +372,5 @@ module.exports = {
   getStat,
   getFullGenresWIthMovie,
   getGenresWIthMovie,
+  getFullDetailMovieAndReviews,
 };

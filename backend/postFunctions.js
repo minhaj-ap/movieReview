@@ -4,7 +4,12 @@ const bcrypt = require("bcrypt");
 async function addMovieDb(params) {
   try {
     const db = await getDb();
-    const movie = { ...params, reviewIds: [] };
+    const movie = {
+      ...params,
+      reviewIds: [],
+      currentRating: 0.0,
+      NoOfRatings: 0,
+    };
     const result = await db.collection("movie_details").insertOne(movie);
     const movieId = result.insertedId;
     console.log("Inserted document:", movieId);

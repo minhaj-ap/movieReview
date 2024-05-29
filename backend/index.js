@@ -11,6 +11,7 @@ const {
   getStat,
   getFullGenresWIthMovie,
   getGenresWIthMovie,
+  getFullDetailMovieAndReviews,
 } = require("./getFunctions");
 const {
   addMovieDb,
@@ -279,7 +280,10 @@ app.delete("/delete-movie/:id", async (req, res) => {
     res.status(500).json({ error: error });
   }
 });
-app.get("/test", (req, res) => {
+app.get("/test/:id", async (req, res) => {
+  const result = await getFullDetailMovieAndReviews(req.params.id);
+  console.log(result);
+  res.status(200).json(result);
   // fetch("http://localhost:3001/signup", {
   //   method: "POST",
   //   headers: {

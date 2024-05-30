@@ -8,8 +8,6 @@ async function deleteMovie(id) {
     }
     const movieObjectId = new ObjectId(id);
 
-    // const session = db.startSession();
-    // session.startTransaction();
     const result = await db
       .collection("movie_details")
       .deleteOne({ _id: movieObjectId });
@@ -24,7 +22,34 @@ async function deleteMovie(id) {
     return error;
   }
 }
+async function deleteReview(id) {
+  const db = getDb();
+  if (!ObjectId.isValid(id)) {
+    console.log("invalid review")
+    return false;
+  }
 
+  const reviewObjectId = new ObjectId(id);
+  console.log("starting");
+  try {
+    const deletion = await db
+      .collection("reviews")
+      .deleteOne({ _id: reviewObjectId });
+    console.log("deletion",deletion)
+    const results = await db
+      .collection("movie_details")
+      .updateOne(
+        { reviewIds: reviewObjectId },
+        { $pull: { reviewIds: reviewObjectId } }
+      )
+    console.log("results",results)
+    return results;
+  } catch (error) {
+    console.log("error in transaction",error);
+    return error;
+  }
+}
 module.exports = {
   deleteMovie,
+  deleteReview,
 };

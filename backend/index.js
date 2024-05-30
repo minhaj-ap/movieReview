@@ -26,7 +26,7 @@ const {
   loginUser,
   loginAdmin,
 } = require("./postFunctions");
-const { deleteMovie } = require("./deleteFunctions");
+const { deleteMovie, deleteReview } = require("./deleteFunctions");
 require("dotenv").config();
 const app = express();
 const PORT = 3001;
@@ -270,6 +270,7 @@ app.post("/admin-login", async (req, res) => {
 });
 app.delete("/delete-movie/:id", async (req, res) => {
   const id = req.params.id;
+  console.log(id)
   try {
     const result = await deleteMovie(id);
     if (result.modifiedCount === 1) {
@@ -281,21 +282,35 @@ app.delete("/delete-movie/:id", async (req, res) => {
     res.status(500).json({ error: error });
   }
 });
-app.get("/test/:id", async (req, res) => {
-  const result = await getUsersReviews(req.params.id);
-  console.log(result);
-  res.status(200).json(result);
-  // fetch("http://localhost:3001/signup", {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  //   body: JSON.stringify({
-  //     name: "",
-  //     password: "235wsr",
-  //     email: "",
-  //   }),
-  // });
+app.delete("/delete-review/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log(id)
+  try {
+    const result = await deleteReview(id);
+    console.log(" deletion result",result);
+    if (result.modifiedCount === 1) {
+      res.status(200).json({ message: "Movie deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Movie not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error });
+    console.log("error in endpoints", error);
+  }
+});
+app.get("/test", async (req, res) => {
+  try {
+   const result = await fetch("http://localhost:3001/delete-review/665743f78b77e0bf06a6d66a", {
+       method: "DELETE",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       
+     });
+     console.log("result",result)
+  } catch (error) {
+    console.log("error",error)
+  }
 });
 connectDb().then(() => {
   app.listen(PORT, () => {

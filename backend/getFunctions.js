@@ -332,6 +332,7 @@ async function getFullDetailMovieAndReviews(id) {
             imageLink: 1,
             currentRating: 1,
             NoOfRatings: 1,
+            ratings: 1,
             "genreDetails.id": 1,
             "genreDetails.name": 1,
             combinedReviews: {

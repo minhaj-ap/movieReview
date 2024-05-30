@@ -1,34 +1,42 @@
-import { createContext, useState ,useEffect} from "react";
+import { createContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
 function AuthProvider(props) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
-
+  const [uid, setUid] = useState(null);
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const storedUser = localStorage.getItem("user");
+    const userId = localStorage.getItem("uid");
+    if (storedUser && userId) {
       setIsLoggedIn(true);
       setUser(JSON.parse(storedUser));
+      setUid(JSON.parse(userId))
     }
   }, []);
 
-  const login = (user) => {
+  const login = (info) => {
     setIsLoggedIn(true);
-    setUser(user);
-    localStorage.setItem('user', JSON.stringify(user));
+    console.log(info)
+    setUser(info.user.name);
+    setUid(info.user.id);
+    localStorage.setItem("user", JSON.stringify(info.user.name));
+    localStorage.setItem("uid", JSON.stringify(info.user.id));
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     setUser(null);
-    localStorage.removeItem('user');
+    setUid(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("uid");
   };
 
   const value = {
     isLoggedIn,
     user,
+    uid,
     login,
     logout,
   };

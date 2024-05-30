@@ -61,7 +61,10 @@ export default function Login({ type }) {
           .then((data) => {
             console.log(data);
             if (data.message === "Success") {
-              login(name);
+              const user ={
+               name: data.result.name,id: data.result._id
+              }
+              login({user});
               resetData();
             }
           });
@@ -85,9 +88,11 @@ export default function Login({ type }) {
           .then((data) => {
             console.log(data);
             if (data.message === "Success") {
-              login(data.result.name);
-              resetData();
-              // window.location.reload();
+              const user ={
+                name: data.result.name,id: data.result._id
+               }
+               login({user});
+               resetData();
             } else {
               alert("Invalid Credentials");
             }

@@ -298,9 +298,10 @@ app.delete("/delete-review/:id", async (req, res) => {
     console.log("error in endpoints", error);
   }
 });
-app.get("/movie-details/:movie",async (req,res)=>{
+app.get("/movie-details/:id",async (req,res)=>{
   try {
-    const id = req.params.movie
+    const id = req.params.id
+    console.log(id)
     const result= await getFullDetailMovieAndReviews(id)
     res.status(200).json(result)
   } catch (error) {

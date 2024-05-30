@@ -18,7 +18,6 @@ const {
   addMovieDb,
   addReview,
   manipulateReview,
-  setTopMovieDb,
   eliminate,
   editMovie,
   createGenre,
@@ -111,10 +110,11 @@ app.post("/edit-movie", async (req, res) => {
 });
 app.post("/review", async (req, res) => {
   try {
+    console.log(req.body)
     await addReview(req.body);
     res
       .status(200)
-      .send({ message: "Movie added successfully", data: req.body });
+      .send({ message: "Review added successfully", data: req.body });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({
@@ -298,16 +298,28 @@ app.delete("/delete-review/:id", async (req, res) => {
     console.log("error in endpoints", error);
   }
 });
+app.get("/movie-details/:movie",async (req,res)=>{
+  try {
+    const id = req.params.movie
+    const result= await getFullDetailMovieAndReviews(id)
+    res.status(200).json(result)
+  } catch (error) {
+    res.status(500).json({message: "failed to get movie details", error: error});
+  }
+})
 app.get("/test", async (req, res) => {
   try {
-   const result = await fetch("http://localhost:3001/delete-review/665743f78b77e0bf06a6d66a", {
-       method: "DELETE",
+   const result = await fetch("http://localhost:3001/review", {
+       method: "POST",
        headers: {
          "Content-Type": "application/json",
        },
-       
+       body: JSON.stringify({
+        user:"6656bf8f6dfe2117334dda54",
+        text:"Checking review"
+       })
      });
-     console.log("result",result)
+     console.log("result", await result.json())
   } catch (error) {
     console.log("error",error)
   }

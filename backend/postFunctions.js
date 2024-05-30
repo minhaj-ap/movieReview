@@ -46,23 +46,20 @@ async function editMovie({ _id, ...updatedData }) {
 }
 async function addReview(params) {
   try {
-    console.log(params);
+    console.log("in function",params.user);
     const db = await getDb();
-    const movieId = parseInt(params.movieId);
-    const user = parseInt(params.user);
-    const likes = parseInt(params.likes);
-    const text = decodeURIComponent(params.text);
-    if (!movieId || !user || !likes || !text) {
+    const userId = params.user;
+    const review = params.text;
+    if (!userId || !review) {
       return false;
     }
-    const review = {
-      movieId,
-      user,
-      text,
-      likes,
+    const reviewData = {
+      userId : new ObjectId(userId),
+      review,
+      like:0,
       date: new Date(),
     };
-    const response = await db.collection("reviews").insertOne(review);
+    const response = await db.collection("reviews").insertOne(reviewData);
 
     const result = response.insertedId;
     return result;

@@ -233,6 +233,9 @@ async function getGenresWIthMovie() {
                 title: { $arrayElemAt: ["$movieDetails.title", 0] },
                 desc: { $arrayElemAt: ["$movieDetails.desc", 0] },
                 imageLink: { $arrayElemAt: ["$movieDetails.imageLink", 0] },
+                currentRating: {
+                  $arrayElemAt: ["$movieDetails.currentRating", 0],
+                },
               },
             },
           },
@@ -307,6 +310,7 @@ async function getFullDetailMovieAndReviews(id) {
                 in: {
                   review: "$$review.review",
                   userId: "$$review.userId",
+                  date: "$$review.date",
                   userName: {
                     $arrayElemAt: [
                       {
@@ -338,6 +342,7 @@ async function getFullDetailMovieAndReviews(id) {
             combinedReviews: {
               review: 1,
               userId: 1,
+              date: 1,
               "userName.name": 1,
             },
           },

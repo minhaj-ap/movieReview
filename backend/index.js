@@ -24,6 +24,7 @@ const {
   addUser,
   loginUser,
   loginAdmin,
+  addRating,
 } = require("./postFunctions");
 const { deleteMovie, deleteReview } = require("./deleteFunctions");
 require("dotenv").config();
@@ -108,9 +109,9 @@ app.post("/edit-movie", async (req, res) => {
     });
   }
 });
-app.post("/review", async (req, res) => {
+app.post("/add-review", async (req, res) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
     await addReview(req.body);
     res
       .status(200)
@@ -123,13 +124,13 @@ app.post("/review", async (req, res) => {
     });
   }
 });
-app.post("/review/:type/:id", async (req, res) => {
+app.post("/edit-review/:id", async (req, res) => {
   try {
     const requestData = {
       id: req.params.id,
-      text: req.body.text,
+      text: req.body.review,
     };
-    await manipulateReview((type = req.params.type), (data = requestData));
+    await manipulateReview( (data = requestData));
     res
       .status(200)
       .send({ message: "Movie added successfully", data: req.body });
@@ -155,7 +156,21 @@ app.post("/delete/:type", async (req) => {
       .send({ message: "An error occurred while deleting", error: error });
   }
 });
-
+app.post("/add-rating", async (req, res) => {
+  try {
+    const result = await addRating(req.body);
+    console.log(result);
+    res
+      .status(200)
+      .send({ message: "Rating added successfully", data: result.insertedId });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message: "An error occurred while adding ratings to the database",
+      error: error,
+    });
+  }
+});
 app.get("/my-reviews/:id", async (req, res) => {
   try {
     const reviews = await myReviewsDb(req.params.id);
@@ -270,7 +285,7 @@ app.post("/admin-login", async (req, res) => {
 });
 app.delete("/delete-movie/:id", async (req, res) => {
   const id = req.params.id;
-  console.log(id)
+  console.log(id);
   try {
     const result = await deleteMovie(id);
     if (result.modifiedCount === 1) {
@@ -284,10 +299,10 @@ app.delete("/delete-movie/:id", async (req, res) => {
 });
 app.delete("/delete-review/:id", async (req, res) => {
   const id = req.params.id;
-  console.log(id)
+  console.log(id);
   try {
     const result = await deleteReview(id);
-    console.log(" deletion result",result);
+    console.log(" deletion result", result);
     if (result.modifiedCount === 1) {
       res.status(200).json({ message: "Movie deleted successfully" });
     } else {
@@ -298,31 +313,33 @@ app.delete("/delete-review/:id", async (req, res) => {
     console.log("error in endpoints", error);
   }
 });
-app.get("/movie-details/:id",async (req,res)=>{
+app.get("/movie-details/:id", async (req, res) => {
   try {
-    const id = req.params.id
-    console.log(id)
-    const result= await getFullDetailMovieAndReviews(id)
-    res.status(200).json(result)
+    const id = req.params.id;
+    console.log(id);
+    const result = await getFullDetailMovieAndReviews(id);
+    res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({message: "failed to get movie details", error: error});
+    res
+      .status(500)
+      .json({ message: "failed to get movie details", error: error });
   }
-})
+});
 app.get("/test", async (req, res) => {
   try {
-   const result = await fetch("http://localhost:3001/review", {
-       method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify({
-        user:"6656bf8f6dfe2117334dda54",
-        text:"Checking review"
-       })
-     });
-     console.log("result", await result.json())
+    const result = await fetch("http://localhost:3001/review", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user: "6656bf8f6dfe2117334dda54",
+        text: "Checking review",
+      }),
+    });
+    console.log("result", await result.json());
   } catch (error) {
-    console.log("error",error)
+    console.log("error", error);
   }
 });
 connectDb().then(() => {

@@ -46,46 +46,99 @@ async function editMovie({ _id, ...updatedData }) {
 }
 async function addReview(params) {
   try {
-    console.log("in function",params.user);
     const db = await getDb();
-    const userId = params.user;
-    const review = params.text;
-    if (!userId || !review) {
+    const userId = params.userId;
+    const review = params.review;
+    const movieId = params.movieId;
+    if (!userId || !review || !movieId) {
       return false;
     }
     const reviewData = {
-      userId : new ObjectId(userId),
+      userId: new ObjectId(userId),
       review,
-      like:0,
       date: new Date(),
     };
     const response = await db.collection("reviews").insertOne(reviewData);
 
-    const result = response.insertedId;
-    return result;
+    const reviewId = response.insertedId;
+    const addingToMovie = await db
+      .collection("movie_details")
+      .updateOne(
+        { _id: new ObjectId(movieId) },
+        { $push: { reviewIds: new ObjectId(reviewId) } }
+      );
+    console.log(addingToMovie);
+    return addingToMovie;
   } catch (error) {
     console.log(error);
     return false;
   }
 }
-async function manipulateReview(type, data) {
+async function addRating(data) {
+  const db = getDb();
+  try {
+    const movieId = data.movieId;
+    const userId = data.userId;
+    const rating = parseFloat(data.rating);
+    const collection = db.collection('movie_details');
+
+    // Check if the user has already rated the movie
+    const movie = await collection.findOne({ _id: new ObjectId(movieId), 'ratings.userId': new ObjectId(userId) });
+
+    if (movie) {
+      // User has rated the movie before, update the rating
+      await collection.updateOne(
+        { _id: new ObjectId(movieId), 'ratings.userId': new ObjectId(userId) },
+        { $set: { 'ratings.$.rating': rating } }
+      );
+
+      // Recalculate the current rating
+      const updatedMovie = await collection.findOne({ _id: new ObjectId(movieId) });
+      const totalRating = updatedMovie.ratings.reduce((acc, rating) => acc + rating.rating, 0);
+      const newCurrentRating = totalRating / updatedMovie.ratings.length;
+
+      await collection.updateOne(
+        { _id: new ObjectId(movieId) },
+        { $set: { currentRating: newCurrentRating } }
+      );
+    } else {
+      // User has not rated the movie before, add the rating
+      await collection.updateOne(
+        { _id: new ObjectId(movieId) },
+        {
+          $push: { ratings: { userId: new ObjectId(userId), rating: rating } },
+          $inc: { NoOfRatings: 1 },
+        }
+      );
+
+      // Recalculate the current rating
+      const updatedMovie = await collection.findOne({ _id: new ObjectId(movieId) });
+      const totalRating = updatedMovie.ratings.reduce((acc, rating) => acc + rating.rating, 0);
+      const newCurrentRating = totalRating / updatedMovie.ratings.length;
+
+     const finalOutput = await collection.updateOne(
+        { _id: new ObjectId(movieId) },
+        { $set: { currentRating: newCurrentRating } }
+      );
+    }
+
+    console.log('Rating update successful');
+    return finalOutput
+  } catch (error) {
+    return error;
+  }
+}
+async function manipulateReview(data) {
   const db = await getDb();
   try {
     const id = data.id;
-    const newText = data.text;
     if (!id) {
       return false;
     }
     const updateOperation = {};
-    if (type === "like") {
-      updateOperation.$inc = { likes: 1 };
-    } else if (type === "edit") {
-      const newText = data.text;
-      updateOperation.$set = { text: newText };
-    } else {
-      // Handle invalid type
-      return false;
-    }
+    const review = data.review;
+    updateOperation.$set = { review: review };
+
     const response = await db
       .collection("reviews")
       .findOneAndUpdate({ _id: new ObjectId(id) }, updateOperation, {
@@ -184,6 +237,7 @@ module.exports = {
   addMovieDb,
   editMovie,
   addReview,
+  addRating,
   manipulateReview,
   eliminate,
   createGenre,

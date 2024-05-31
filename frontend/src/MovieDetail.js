@@ -17,6 +17,7 @@ export default function MovieDetail() {
   const [movieData, setMovieData] = useState([]);
   const [openSaveRating, setOpenSaveRating] = useState(false);
   const [openSaveReview, setOpenSaveReview] = useState(false);
+  const [userReview, setUserReview] = useState("");
   const id = useParams();
   const { uid } = useContext(AuthContext);
   useEffect(() => {
@@ -39,11 +40,32 @@ export default function MovieDetail() {
   const [newReview, setNewReview] = useState("");
   const [reviews, setReviews] = useState([]);
   const handleRating = (e) => {
-    console.log(e.target.value);
     setRating(e.target.value);
+    setOpenSaveRating(false);
   };
   const handleReview = (e) => {
     setNewReview(e.target.value);
+  };
+  const addRating = async (e) => {
+    try {
+      const response = await fetch("http://localhost:3001/add-rating", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: uid,
+          movieId: id.id,
+          rating: rating,
+        }),
+      });
+      const data = await response.json();
+      console.log(data);
+      setOpenSaveRating(false);
+      setMoviesRatedByUser(rating)
+    } catch (error) {
+      console.log(error);
+    }
   };
   useEffect(() => {
     if (movieData.length) {
@@ -62,7 +84,25 @@ export default function MovieDetail() {
       setReviews(otherReviews);
     }
   }, [movieData, uid]);
-  console.log(moviesReviewedByUser);
+  const addReview = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/add-review/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: uid,
+          movieId: id.id,
+          review: userReview,
+        }),
+      });
+      const data = await response.json();
+      setMoviesReviewedByUser(data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const baseUrl =
     "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
   return (
@@ -95,14 +135,6 @@ export default function MovieDetail() {
               </ul>
             </div>
           </div>
-          {/* <div className="movie_details_reviews">
-            {e.combinedReviews.map((e) => (
-              <div className="movie_details_review_item">
-                <p>{e.userName}</p>
-                <p>{e.review}</p>
-              </div>
-            ))}
-          </div> */}
           <div className="user_rating_review">
             {moviesRatedByUser ? (
               <div className="user_rating">
@@ -130,7 +162,7 @@ export default function MovieDetail() {
                   <Button
                     variant="outlined"
                     color="inherit"
-                    onClick={() => setOpenSaveRating(!openSaveRating)}
+                    onClick={addRating}
                   >
                     SAVE
                   </Button>
@@ -185,11 +217,7 @@ export default function MovieDetail() {
                     onChange={handleRating}
                   />
                 </Stack>
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  onClick={() => console.log(rating)}
-                >
+                <Button variant="outlined" color="inherit" onClick={addRating}>
                   SAVE
                 </Button>
               </div>
@@ -204,18 +232,22 @@ export default function MovieDetail() {
             <h3>Reviews</h3>
             {!moviesReviewedByUser[0] && (
               <TextField
-              label="ADD YOUR REVIEW"
-              helperText="POST YOUR REVIEW HERE"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton aria-label="send review">
-                      <SendIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+                label="ADD YOUR REVIEW"
+                helperText="POST YOUR REVIEW HERE"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton aria-label="send review" onClick={addReview}>
+                        <SendIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                value={userReview}
+                onChange={(e) => {
+                  setUserReview(e.target.value);
+                }}
+              />
             )}
             {reviews.map((e) => (
               <ReviewTile type="user" data={e} />

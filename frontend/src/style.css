@@ -509,6 +509,9 @@ header.dark {
   align-items: center;
   margin-bottom: 1em;
 }
+.user_review + .non_rating {
+  width: 50%;
+}
 @media only screen and (max-width: 600px) {
   .movie_details_shower {
     flex-direction: column;
@@ -532,5 +535,8 @@ header.dark {
   }
   .non_rating {
     place-content: stretch;
+  }
+  .user_review + .non_rating {
+    width: 100%;
   }
 }

@@ -6,19 +6,21 @@ function AuthProvider(props) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [uid, setUid] = useState(null);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const userId = localStorage.getItem("uid");
     if (storedUser && userId) {
       setIsLoggedIn(true);
       setUser(JSON.parse(storedUser));
-      setUid(JSON.parse(userId))
+      setUid(JSON.parse(userId));
     }
+    setLoading(false);
   }, []);
 
   const login = (info) => {
     setIsLoggedIn(true);
-    console.log(info)
+    console.log(info);
     setUser(info.user.name);
     setUid(info.user.id);
     localStorage.setItem("user", JSON.stringify(info.user.name));
@@ -37,6 +39,7 @@ function AuthProvider(props) {
     isLoggedIn,
     user,
     uid,
+    loading,
     login,
     logout,
   };

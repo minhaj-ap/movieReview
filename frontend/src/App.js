@@ -27,9 +27,11 @@ function App() {
       </div>
     </Router>
   );
-   function CheckAuth(Element) {
-    const { isLoggedIn, uid } = useContext(AuthContext);
-    console.log(uid);
+  function CheckAuth(Element) {
+    const { isLoggedIn, loading } = useContext(AuthContext);
+    if (loading) {
+      return <div>Loading...</div>; // Or any loading indicator
+    }
     return isLoggedIn ? <Element /> : <Navigate to="/" />;
   }
 }

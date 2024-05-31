@@ -311,6 +311,7 @@ async function getFullDetailMovieAndReviews(id) {
                   review: "$$review.review",
                   userId: "$$review.userId",
                   date: "$$review.date",
+                  _id: "$$review._id",
                   userName: {
                     $arrayElemAt: [
                       {
@@ -343,6 +344,7 @@ async function getFullDetailMovieAndReviews(id) {
               review: 1,
               userId: 1,
               date: 1,
+              _id:1,
               "userName.name": 1,
             },
           },
@@ -356,6 +358,7 @@ async function getFullDetailMovieAndReviews(id) {
                 in: {
                   review: "$$cr.review",
                   userId: "$$cr.userId",
+                  _id:"$$cr._id",
                   userName: "$$cr.userName.name",
                 },
               },

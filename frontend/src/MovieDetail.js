@@ -43,6 +43,7 @@ export default function MovieDetail() {
     setRating(e.target.value);
     setOpenSaveRating(false);
   };
+  console.log(moviesReviewedByUser);
   const handleReview = (e) => {
     setNewReview(e.target.value);
   };
@@ -62,10 +63,28 @@ export default function MovieDetail() {
       const data = await response.json();
       console.log(data);
       setOpenSaveRating(false);
-      setMoviesRatedByUser(rating)
+      setMoviesRatedByUser(rating);
     } catch (error) {
       console.log(error);
     }
+  };
+  const editReview = async () => {
+    console.log("triggered")
+    try {
+      const response = await fetch(
+        `http://localhost:3001/edit-review/${moviesReviewedByUser[0]._id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            review: newReview,
+          }),
+        }
+      );
+      console.log(response);
+    } catch (error) {}
   };
   useEffect(() => {
     if (movieData.length) {
@@ -196,7 +215,7 @@ export default function MovieDetail() {
                   <Button
                     variant="outlined"
                     color="inherit"
-                    onClick={() => setOpenSaveReview(!openSaveReview)}
+                    onClick={editReview}
                   >
                     SAVE
                   </Button>

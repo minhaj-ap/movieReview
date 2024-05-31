@@ -128,9 +128,11 @@ app.post("/edit-review/:id", async (req, res) => {
   try {
     const requestData = {
       id: req.params.id,
-      text: req.body.review,
+      review: req.body.review,
     };
-    await manipulateReview( (data = requestData));
+    console.log(requestData)
+    const response = await manipulateReview((data = requestData));
+    console.log(response)
     res
       .status(200)
       .send({ message: "Movie added successfully", data: req.body });

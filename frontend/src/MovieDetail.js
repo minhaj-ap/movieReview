@@ -12,7 +12,9 @@ import {
 import { AuthContext } from "./functions/AuthContext";
 import EditIcon from "@mui/icons-material/Edit";
 import SendIcon from "@mui/icons-material/Send";
+import DeleteIcon from "@mui/icons-material/Delete";
 import ReviewTile from "./components/reviewTile";
+import ConfirmDialog from "./ConfirmBox";
 export default function MovieDetail() {
   const [movieData, setMovieData] = useState([]);
   const [openSaveRating, setOpenSaveRating] = useState(false);
@@ -39,6 +41,7 @@ export default function MovieDetail() {
   const [rating, setRating] = useState();
   const [newReview, setNewReview] = useState("");
   const [reviews, setReviews] = useState([]);
+  const [openConfirm, setOpenConfirm] = useState(false);
   const handleRating = (e) => {
     setRating(e.target.value);
     setOpenSaveRating(false);
@@ -69,7 +72,7 @@ export default function MovieDetail() {
     }
   };
   const editReview = async () => {
-    console.log("triggered")
+    console.log("triggered");
     try {
       const response = await fetch(
         `http://localhost:3001/edit-review/${moviesReviewedByUser[0]._id}`,
@@ -117,10 +120,28 @@ export default function MovieDetail() {
         }),
       });
       const data = await response.json();
-      setMoviesReviewedByUser(data.data);
+      console.log(data);
+      setMoviesReviewedByUser([{ review: userReview }]);
+      setUserReview("");
     } catch (error) {
       console.log(error);
     }
+  };
+  const deleteReview = async (e) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/delete-review/${moviesReviewedByUser[0]._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-type": "application/json",
+          },
+        }
+      );
+      console.log(response);
+      setOpenConfirm(false);
+      setMoviesReviewedByUser([]);
+    } catch (error) {}
   };
   const baseUrl =
     "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
@@ -194,11 +215,23 @@ export default function MovieDetail() {
               <div className="user_review">
                 <div className="user_review_header">
                   <p>YOUR REVIEW</p>
-                  <IconButton
-                    onClick={() => setOpenSaveReview(!openSaveReview)}
-                  >
-                    <EditIcon />
-                  </IconButton>
+                  <div style={{ display: "flex" }}>
+                    <IconButton
+                      onClick={() => setOpenSaveReview(!openSaveReview)}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton onClick={() => setOpenConfirm(true)}>
+                      <DeleteIcon />
+                    </IconButton>
+                    <ConfirmDialog
+                      open={openConfirm}
+                      handleClose={() => setOpenConfirm(false)}
+                      handleConfirm={() => {
+                        deleteReview();
+                      }}
+                    />
+                  </div>
                 </div>
                 {openSaveReview ? (
                   <TextField

@@ -6,7 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { ThemeContext } from "../functions/ThemeContext";
 import MovieModifier from "./subComponents/movieModifier";
-
+import ConfirmDialog from "../ConfirmBox";
 import { useTheme, useMediaQuery } from "@mui/material";
 export default function MovieList() {
   const [movies, setMovies] = useState([]);
@@ -15,6 +15,7 @@ export default function MovieList() {
   const [editData, setEditData] = useState();
   const [formType, setFormType] = useState("");
   const [fetchNew, setFetchNew] = useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false);
   const { theme } = useContext(ThemeContext);
   const size = useTheme();
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
@@ -53,7 +54,7 @@ export default function MovieList() {
     setShowForm(true);
   }
   async function deleteMovie(e) {
-    console.log("triggered")
+    console.log("triggered");
     const response = await fetch(
       `http://localhost:3001/delete-movie/${e._id}`,
       {
@@ -63,7 +64,7 @@ export default function MovieList() {
         },
       }
     );
-    console.log(response)
+    console.log(response);
     if (response.ok) {
       setFetchNew(true);
     } else {
@@ -145,11 +146,20 @@ export default function MovieList() {
                   </IconButton>
                   <IconButton
                     onClick={() => {
-                      deleteMovie(e);
+                      setOpenConfirm(true);
                     }}
                   >
                     <DeleteIcon />
                   </IconButton>
+                  <ConfirmDialog
+                    open={openConfirm}
+                    handleClose={() => {
+                      setOpenConfirm(false);
+                    }}
+                    handleConfirm={() => {
+                      deleteMovie(e);
+                    }}
+                  />
                 </div>
               </div>
             </Grid>

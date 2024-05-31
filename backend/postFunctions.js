@@ -80,21 +80,29 @@ async function addRating(data) {
     const movieId = data.movieId;
     const userId = data.userId;
     const rating = parseFloat(data.rating);
-    const collection = db.collection('movie_details');
+    const collection = db.collection("movie_details");
 
     // Check if the user has already rated the movie
-    const movie = await collection.findOne({ _id: new ObjectId(movieId), 'ratings.userId': new ObjectId(userId) });
+    const movie = await collection.findOne({
+      _id: new ObjectId(movieId),
+      "ratings.userId": new ObjectId(userId),
+    });
 
     if (movie) {
       // User has rated the movie before, update the rating
       await collection.updateOne(
-        { _id: new ObjectId(movieId), 'ratings.userId': new ObjectId(userId) },
-        { $set: { 'ratings.$.rating': rating } }
+        { _id: new ObjectId(movieId), "ratings.userId": new ObjectId(userId) },
+        { $set: { "ratings.$.rating": rating } }
       );
 
       // Recalculate the current rating
-      const updatedMovie = await collection.findOne({ _id: new ObjectId(movieId) });
-      const totalRating = updatedMovie.ratings.reduce((acc, rating) => acc + rating.rating, 0);
+      const updatedMovie = await collection.findOne({
+        _id: new ObjectId(movieId),
+      });
+      const totalRating = updatedMovie.ratings.reduce(
+        (acc, rating) => acc + rating.rating,
+        0
+      );
       const newCurrentRating = totalRating / updatedMovie.ratings.length;
 
       await collection.updateOne(
@@ -112,18 +120,23 @@ async function addRating(data) {
       );
 
       // Recalculate the current rating
-      const updatedMovie = await collection.findOne({ _id: new ObjectId(movieId) });
-      const totalRating = updatedMovie.ratings.reduce((acc, rating) => acc + rating.rating, 0);
+      const updatedMovie = await collection.findOne({
+        _id: new ObjectId(movieId),
+      });
+      const totalRating = updatedMovie.ratings.reduce(
+        (acc, rating) => acc + rating.rating,
+        0
+      );
       const newCurrentRating = totalRating / updatedMovie.ratings.length;
 
-     const finalOutput = await collection.updateOne(
+      const finalOutput = await collection.updateOne(
         { _id: new ObjectId(movieId) },
         { $set: { currentRating: newCurrentRating } }
       );
     }
 
-    console.log('Rating update successful');
-    return finalOutput
+    console.log("Rating update successful");
+    return finalOutput;
   } catch (error) {
     return error;
   }
@@ -213,6 +226,10 @@ async function loginUser(props) {
     if (!user) {
       return false;
     }
+    if (user.isBanned) {
+      return "You are banned by the administrator";
+    }
+    console.log(user.isBanned);
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return false;

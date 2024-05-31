@@ -78,16 +78,15 @@ export default function Login({ type }) {
           },
           body: JSON.stringify(data),
         })
-          .then((response) => {
-            if (!response.ok) {
-              alert("Invalid Credentials");
-              resetData();
-              throw new Error("Network response was not ok");
+          .then(async (response) => {
+            const data = await response.json();
+            if (data.message === " You are banned by the administrator") {
+              alert(data.message);
+              return false;
             }
-            return response.json();
+            return data;
           })
-          .then((data) => {
-            console.log(data);
+          .then(async (data) => {
             if (data.message === "Success") {
               const user = {
                 name: data.result.name,
@@ -96,7 +95,8 @@ export default function Login({ type }) {
               login({ user });
               resetData();
             } else {
-              alert("Invalid Credentials");
+              alert(data.message);
+              resetData();
             }
           })
           .catch((error) => {

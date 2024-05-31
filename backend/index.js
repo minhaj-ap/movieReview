@@ -130,9 +130,9 @@ app.post("/edit-review/:id", async (req, res) => {
       id: req.params.id,
       review: req.body.review,
     };
-    console.log(requestData)
+    console.log(requestData);
     const response = await manipulateReview((data = requestData));
-    console.log(response)
+    console.log(response);
     res
       .status(200)
       .send({ message: "Movie added successfully", data: req.body });
@@ -260,7 +260,9 @@ app.post("/login", async (req, res) => {
   try {
     const result = await loginUser(req.body);
     console.log(result);
-    if (result) {
+    if (result == "You are banned by the administrator") {
+      res.status(403).json({ message: result ,ok:false});
+    } else if (result) {
       res.status(200).json({ message: "Success", result: result });
     } else {
       res.status(404).json({ message: "Invalid Credentials", result: result });

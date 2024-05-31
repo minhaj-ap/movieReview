@@ -93,7 +93,6 @@ async function getAllMovie() {
         },
       ])
       .toArray();
-    console.log(result);
     return result;
   } catch (error) {
     return error;

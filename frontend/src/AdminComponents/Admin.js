@@ -8,6 +8,7 @@ export default function AdminHome() {
   const [noOfUsers, setNoOfUsers] = useState();
   const [mostRatedMovie, setmostRatedMovie] = useState();
   const [leastRatedMovie, setleastRatedMovie] = useState();
+  const [recentUsers, setRecentusers] = useState([]);
   useEffect(() => {
     async function fetchData() {
       await fetch("http://localhost:3001/stats")
@@ -17,6 +18,19 @@ export default function AdminHome() {
     }
     fetchData();
   }, []);
+  if (data[0] && !noOfMovies) {
+    setNoOfMovies(data[0].numberofMovies);
+    setNoOfReviews(data[0].numberofReviews);
+    setNoOfUsers(data[0].numberofUsers);
+    setmostRatedMovie(data[0].mostRatedMovie);
+    setleastRatedMovie(data[0].leastRatedMovie);
+    setRecentusers(data[0].recentUsers);
+  }
+  let resultString = "";
+  for (let i = 0; i < recentUsers.length; i++) {
+    resultString += `${i + 1}.${recentUsers[i]} `;
+  }
+  resultString = resultString.trim();
   const result = [
     {
       title: "Total Movies",
@@ -38,14 +52,9 @@ export default function AdminHome() {
       title: "Least rated movie",
       value: leastRatedMovie || "No movies available",
     },
+    { title: "Recent Users", value: resultString || "No users available" },
   ];
-  if (data[0]) {
-    setNoOfMovies(data[0].numberofMovies);
-    setNoOfReviews(data[0].numberofReviews);
-    setNoOfUsers(data[0].numberofUsers);
-    setmostRatedMovie(data[0].mostRatedMovie);
-    setleastRatedMovie(data[0].leastRatedMovie);
-  }
+
   return (
     <div className="admin stats">
       <h2>STATS</h2>
@@ -55,7 +64,7 @@ export default function AdminHome() {
             <Grid item xs={12} sm={4} md={3} gap={4} key={index}>
               <div className="stat item">
                 <p className="stat_heading">{e.title}</p>
-                <span className="stat_value">{e.value}</span>
+                <span className="stat_value">{e.value || 0}</span>
               </div>
             </Grid>
           ))}

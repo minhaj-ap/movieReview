@@ -129,7 +129,7 @@ export default function MovieList() {
                 <div>
                   <img src={e.imageLink} alt="" />
                 </div>
-                <div className="list_content">
+                <div className="list_content admin">
                   <h3>{e.title}</h3>
                   <h6>{e.desc}</h6>
                 </div>

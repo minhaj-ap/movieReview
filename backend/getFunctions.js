@@ -127,6 +127,8 @@ async function getStat() {
     const numberofMovies = await db
       .collection("movie_details")
       .countDocuments({});
+    const Users = await db.collection("users").find({}).limit(3).toArray();
+    const recentUsers = Users.map((user) => user.name);
     const data = [
       {
         mostRatedMovie: mostRatedMovie[0].title,
@@ -134,6 +136,7 @@ async function getStat() {
         numberofReviews,
         numberofUsers,
         numberofMovies,
+        recentUsers,
       },
     ];
     return data;
@@ -343,7 +346,7 @@ async function getFullDetailMovieAndReviews(id) {
               review: 1,
               userId: 1,
               date: 1,
-              _id:1,
+              _id: 1,
               "userName.name": 1,
             },
           },
@@ -357,7 +360,7 @@ async function getFullDetailMovieAndReviews(id) {
                 in: {
                   review: "$$cr.review",
                   userId: "$$cr.userId",
-                  _id:"$$cr._id",
+                  _id: "$$cr._id",
                   userName: "$$cr.userName.name",
                 },
               },

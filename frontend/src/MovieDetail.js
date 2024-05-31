@@ -87,15 +87,18 @@ export default function MovieDetail() {
         }
       );
       console.log(response);
+      setOpenSaveReview(false);
     } catch (error) {}
   };
   useEffect(() => {
     if (movieData.length) {
-      const ratedMovies = movieData
-        .flatMap((movie) => movie.ratings)
-        .filter((rating) => rating.userId === uid)
-        .map((rating) => rating.rating);
-      setMoviesRatedByUser(parseFloat(ratedMovies));
+      if(movieData[0].ratings){
+        const ratedMovies = movieData
+          .flatMap((movie) => movie.ratings)
+          .filter((rating) => rating.userId === uid)
+          .map((rating) => rating.rating);
+        setMoviesRatedByUser(parseFloat(ratedMovies));
+      }
       const reviewedMovies = movieData
         .flatMap((movie) => movie.combinedReviews)
         .filter((reviews) => reviews.userId === uid);

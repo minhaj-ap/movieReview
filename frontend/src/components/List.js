@@ -21,8 +21,8 @@ export default function List() {
   }, []);
   return (
     <div className={` list-container`}>
-      {movies.map((e) => (
-        <MovieList props={e} />
+      {movies.map((e,index) => (
+        <MovieList props={e} key={index}/>
       ))}
     </div>
   );

@@ -374,15 +374,12 @@ async function getFullDetailMovieAndReviews(id) {
     return error;
   }
 }
-async function getUsersReviews(id) {
+async function getUsersAndReviews() {
   try {
-    const db = getDb();
-    const result = db
+    const db = await getDb();
+    const reviewedUsers = await db
       .collection("users")
       .aggregate([
-        {
-          $match: { _id: new ObjectId(id) }, // Replace with the user's ObjectId
-        },
         {
           $lookup: {
             from: "reviews",
@@ -392,45 +389,75 @@ async function getUsersReviews(id) {
           },
         },
         {
-          $unwind: "$userReviews",
+          $unwind: {
+            path: "$userReviews",
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
           $lookup: {
             from: "movie_details",
-            localField: "userReviews._id", // Assuming reviews contain movieI
+            localField: "userReviews._id",
             foreignField: "reviewIds",
-            as: "movieDetails",
+            as: "userReviews.movieDetails",
           },
-        },
-        {
-          $unwind: "$movieDetails",
         },
         {
           $group: {
             _id: "$_id",
-            name: { $first: "$name" },
-            email: { $first: "$email" },
-            reviews: {
-              $push: {
-                review: "$userReviews.review",
-                movie: {
-                  title: "$movieDetails.title",
-                },
-              },
-            },
+            userName: { $first: "$name" },
+            userEmail: { $first: "$email" },
+            isBanned: { $first: "$isBanned" },
+            userReviews: { $push: "$userReviews" },
           },
         },
         {
-          $project: {
-            _id: 1,
-            name: 1,
-            email: 1,
-            reviews: 1,
+          $project:{
+            userName:1,
+            userEmail:1,
+            isBanned:1,
+            "userReviews.review":1,
+            "userReviews._id":1,
+            "userReviews.movieDetails._id":1,
+            "userReviews.movieDetails.title":1,
+          }
+        }
+      ])
+      .toArray();
+    return reviewedUsers;
+  } catch (error) {
+    return error;
+  }
+}
+async function getBannedUsers() {
+  try {
+    const db = getDb();
+    const result = await db
+      .collection("users")
+      .aggregate([
+        {
+          $match: {
+            isBanned: true,
           },
         },
       ])
       .toArray();
     return result;
+  } catch (error) {
+    return error;
+  }
+}
+async function isBanned(id) {
+  const db = await getDb();
+  try {
+    const result = await db.collection("users").find({ _id: new ObjectId(id) }).toArray()
+    let isBanned;
+    if (result) {
+      isBanned = result[0].isBanned || false;
+    }
+    console.log(result)
+    console.log(isBanned);
+    return isBanned;
   } catch (error) {
     return error;
   }
@@ -445,5 +472,7 @@ module.exports = {
   getFullGenresWIthMovie,
   getGenresWIthMovie,
   getFullDetailMovieAndReviews,
-  getUsersReviews,
+  getUsersAndReviews,
+  getBannedUsers,
+  isBanned,
 };

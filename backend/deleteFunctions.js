@@ -25,7 +25,7 @@ async function deleteMovie(id) {
 async function deleteReview(id) {
   const db = getDb();
   if (!ObjectId.isValid(id)) {
-    console.log("invalid review")
+    console.log("invalid review");
     return false;
   }
 
@@ -35,21 +35,46 @@ async function deleteReview(id) {
     const deletion = await db
       .collection("reviews")
       .deleteOne({ _id: reviewObjectId });
-    console.log("deletion",deletion)
+    console.log("deletion", deletion);
     const results = await db
       .collection("movie_details")
       .updateOne(
         { reviewIds: reviewObjectId },
         { $pull: { reviewIds: reviewObjectId } }
-      )
-    console.log("results",results)
+      );
+    console.log("results", results);
     return results;
   } catch (error) {
-    console.log("error in transaction",error);
+    console.log("error in transaction", error);
     return error;
+  }
+}
+async function banUser(data) {
+  const database = await getDb();
+  const userId = data.userId;
+  const reviewIds = data.reviewIds;
+  const movieIds = data.movieIds;
+  const usersCollection = database.collection("users");
+  await usersCollection.updateOne(
+    { _id: new ObjectId(userId) },
+    { $set: { isBanned: true } }
+  );
+  if (reviewIds) {
+    const reviewsCollection = database.collection("reviews");
+    await reviewsCollection.deleteMany({
+      _id: { $in: reviewIds.map((id) => new ObjectId(id)) },
+    });
+  }
+  if (movieIds) {
+    const movieDetailsCollection = database.collection("movie_details");
+    await movieDetailsCollection.updateMany(
+      { _id: { $in: movieIds.map((id) => new ObjectId(id)) } },
+      { $pull: { reviewIds: { $in: reviewIds.map((id) => new ObjectId(id)) } } }
+    );
   }
 }
 module.exports = {
   deleteMovie,
   deleteReview,
+  banUser,
 };

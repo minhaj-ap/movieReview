@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 export default function MovieList({ props }) {
   const [isLoading, setLoading] = useState(true);
   const navigate = useNavigate();
-  console.log(props);
   useEffect(() => {
     if (props) {
       setLoading(false);

@@ -12,7 +12,9 @@ const {
   getFullGenresWIthMovie,
   getGenresWIthMovie,
   getFullDetailMovieAndReviews,
-  getUsersReviews,
+  getUsersAndReviews,
+  getBannedUsers,
+  isBanned,
 } = require("./getFunctions");
 const {
   addMovieDb,
@@ -25,8 +27,9 @@ const {
   loginUser,
   loginAdmin,
   addRating,
+  unBanUser,
 } = require("./postFunctions");
-const { deleteMovie, deleteReview } = require("./deleteFunctions");
+const { deleteMovie, deleteReview, banUser } = require("./deleteFunctions");
 require("dotenv").config();
 const app = express();
 const PORT = 3001;
@@ -47,6 +50,8 @@ app.get("/search", async (req, res) => {
 });
 
 app.get("/get-movies-all", async (req, res) => {
+  const result = await isBanned(req.query.user)
+  if(result) return res.status(403).json({isBanned: true})
   try {
     const movieResult = await getAllMovie();
     res.json(movieResult);
@@ -261,7 +266,7 @@ app.post("/login", async (req, res) => {
     const result = await loginUser(req.body);
     console.log(result);
     if (result == "You are banned by the administrator") {
-      res.status(403).json({ message: result ,ok:false});
+      res.status(403).json({ message: result, ok: false });
     } else if (result) {
       res.status(200).json({ message: "Success", result: result });
     } else {
@@ -329,19 +334,56 @@ app.get("/movie-details/:id", async (req, res) => {
       .json({ message: "failed to get movie details", error: error });
   }
 });
+app.get("/get-users-and-reviews", async (req, res) => {
+  try {
+    const result = await getUsersAndReviews();
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message: "An error occurred while fetching users and reviews",
+      error: error,
+    });
+  }
+});
+app.delete("/ban-user", async (req, res) => {
+  try {
+    const result = await banUser(req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message: "An error occurred while fetching users and reviews",
+      error: error,
+    });
+  }
+});
+app.post("/unban-user", async (req,res)=>{
+  try {
+    const result = await unBanUser(req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({
+      message: "An error occurred while fetching users and reviews",
+      error: error,
+    });
+  }
+})
 app.get("/test", async (req, res) => {
   try {
-    const result = await fetch("http://localhost:3001/review", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user: "6656bf8f6dfe2117334dda54",
-        text: "Checking review",
-      }),
-    });
-    console.log("result", await result.json());
+    const result = await getBannedUsers();
+    // const result = await fetch("http://localhost:3001/review", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     user: "6656bf8f6dfe2117334dda54",
+    //     text: "Checking review",
+    //   }),
+    // });
+    res.json(result);
   } catch (error) {
     console.log("error", error);
   }

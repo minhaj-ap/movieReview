@@ -249,7 +249,24 @@ async function loginAdmin(props) {
     return error;
   }
 }
-
+async function unBanUser(id) {
+  try {
+    console.log(id);
+    const db = await getDb()
+    const result = await db
+      .collection("users")
+      .findOneAndUpdate(
+        { _id: new ObjectId(id.userId) },
+        {
+          $set: { isBanned: false },
+        }
+      )
+      .toArray();
+    return result;
+  } catch (error) {
+    return error;
+  }
+}
 module.exports = {
   addMovieDb,
   editMovie,
@@ -261,4 +278,5 @@ module.exports = {
   addUser,
   loginUser,
   loginAdmin,
+  unBanUser,
 };

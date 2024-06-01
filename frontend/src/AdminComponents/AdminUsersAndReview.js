@@ -120,22 +120,30 @@ function TotalUserAndReviews() {
               {e.userReviews.length > 0 &&
                 e.userReviews.map((review, index) => (
                   <React.Fragment key={index}>
-                    <div className="review_info_tile">
-                      <div>
-                        <Typography>
-                          Review: {review.review || "NO DATA"}
-                        </Typography>
-                        {review.movieDetails &&
-                          review.movieDetails.length > 0 &&
-                          review.movieDetails.map((movie, idx) => (
-                            <Typography key={idx}>
-                              Movie: {movie.title}
+                    {review.review ? (
+                      <>
+                        <div className="review_info_tile">
+                          <div>
+                            <Typography>
+                              Review: {review.review || "NO DATA"}
                             </Typography>
-                          ))}
+                            {review.movieDetails &&
+                              review.movieDetails.length > 0 &&
+                              review.movieDetails.map((movie, idx) => (
+                                <Typography key={idx}>
+                                  Movie: {movie.title}
+                                </Typography>
+                              ))}
+                          </div>
+                          <DeleteIcon />
+                        </div>
+                        <hr />
+                      </>
+                    ) : (
+                      <div style={{ textAlign: "center" }}>
+                        <strong> THE USER HAVE NO REVIEWS</strong>
                       </div>
-                      <DeleteIcon />
-                    </div>
-                    <hr />
+                    )}
                   </React.Fragment>
                 ))}
             </AccordionDetails>

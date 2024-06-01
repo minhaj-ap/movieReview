@@ -15,6 +15,7 @@ import SendIcon from "@mui/icons-material/Send";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReviewTile from "./components/reviewTile";
 import ConfirmDialog from "./ConfirmBox";
+import { ThemeContext } from "./functions/ThemeContext";
 export default function MovieDetail() {
   const [movieData, setMovieData] = useState([]);
   const [openSaveRating, setOpenSaveRating] = useState(false);
@@ -22,6 +23,7 @@ export default function MovieDetail() {
   const [userReview, setUserReview] = useState("");
   const id = useParams();
   const { uid } = useContext(AuthContext);
+  const { theme } = useContext(ThemeContext);
   useEffect(() => {
     async function fetchData() {
       try {
@@ -92,7 +94,7 @@ export default function MovieDetail() {
   };
   useEffect(() => {
     if (movieData.length) {
-      if(movieData[0].ratings){
+      if (movieData[0].ratings) {
         const ratedMovies = movieData
           .flatMap((movie) => movie.ratings)
           .filter((rating) => rating.userId === uid)
@@ -150,26 +152,26 @@ export default function MovieDetail() {
     "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
   return (
     <>
-      <Header />
+      <Header inLink={true}/>
       {movieData.map((e, index) => (
-        <div className="movie_details_container" key={index}>
-          <div className="movie_details_shower">
+        <div className={`movie_details_container ${theme}`} key={index}>
+          <div className={`movie_details_shower ${theme}`}>
             <div className="movie_details_image">
               <img src={baseUrl + e.imageLink} alt="" />
             </div>
-            <div className="movie_details_info">
-              <h1>
+            <div className={`movie_details_info ${theme}`}>
+              <h4>
                 Title:<span>{e.title}</span>
-              </h1>
-              <h3>
+              </h4>
+              <h4>
                 Description:<span>{e.desc}</span>
-              </h3>
-              <h5>
+              </h4>
+              <h4>
                 No of ratings:<span>{e.NoOfRatings}</span>
-              </h5>
-              <h5>
+              </h4>
+              <h4>
                 Current rating<span>{e.currentRating}</span>
-              </h5>
+              </h4>
               <ul>
                 Genres:
                 {e.genreDetails.map((e, index) => (
@@ -178,7 +180,7 @@ export default function MovieDetail() {
               </ul>
             </div>
           </div>
-          <div className="user_rating_review">
+          <div className={`user_rating_review ${theme}`}>
             {moviesRatedByUser ? (
               <div className="user_rating">
                 <div className="user_review_header">
@@ -261,9 +263,9 @@ export default function MovieDetail() {
               ""
             )}
             {!moviesRatedByUser && (
-              <div className="non_rating">
+              <div className={`non_rating ${theme}`}>
                 <p>Rate now</p>
-                <Stack spacing={1}>
+                <Stack spacing={1} sx={{ margin: "auto" }}>
                   <Rating
                     defaultValue={moviesRatedByUser}
                     precision={0.5}
@@ -283,7 +285,7 @@ export default function MovieDetail() {
               </div>
             )}
           </div>
-          <div className="review_section">
+          <div className={`review_section ${theme}`}>
             <h3>Reviews</h3>
             {!moviesReviewedByUser[0] && (
               <TextField
@@ -302,6 +304,7 @@ export default function MovieDetail() {
                 onChange={(e) => {
                   setUserReview(e.target.value);
                 }}
+                className="review_Adder"
               />
             )}
             {reviews.map((e) => (

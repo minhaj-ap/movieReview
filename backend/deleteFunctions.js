@@ -70,7 +70,7 @@ async function banUser(data) {
     await movieDetailsCollection.updateMany(
       { _id: { $in: movieIds.map((id) => new ObjectId(id)) } },
       { $pull: { reviewIds: { $in: reviewIds.map((id) => new ObjectId(id)) } } }
-    );
+    )
   }
 }
 module.exports = {

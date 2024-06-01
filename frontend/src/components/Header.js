@@ -3,6 +3,7 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useContext, useState } from "react";
 import {
   useTheme,
@@ -11,15 +12,18 @@ import {
   Menu,
   MenuItem,
   Button,
+  IconButton,
 } from "@mui/material";
 import { ThemeContext } from "../functions/ThemeContext";
 import { AuthContext } from "../functions/AuthContext";
-export default function Header() {
+import { useNavigate } from "react-router-dom";
+export default function Header({inLink}) {
   const [isDark, setisDark] = useState(false);
   const { toggleTheme } = useContext(ThemeContext);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { isLoggedIn, logout, user } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
   const [search, setSearch] = useState(false);
+  const navigate = useNavigate()
   function handleSearch() {
     setSearch((prev) => !prev);
   }
@@ -35,14 +39,12 @@ export default function Header() {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  console.log(theme);
   function searchFunc(e) {
     e.preventDefault();
     const searchTerm = document.getElementById("searchInput").value;
-    const baseUrl = "http://localhost:3001/search"; // Your base URL
+    const baseUrl = "http://localhost:3001/search"; 
     const url = `${baseUrl}?query=${encodeURIComponent(searchTerm)}`;
 
-    // Make request using fetch
     fetch(url)
       .then((response) => response.json())
       .then((data) => {})
@@ -55,10 +57,20 @@ export default function Header() {
     logout();
   };
   const size = useTheme();
+  console.log(inLink)
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   return (
-    <header className={`${search && isMobile ? " header_col" : ""}`}>
-      <div className={`${isLoggedIn && "admin"} header_name`}>
+    <header className={`${search && isMobile ? "header_col" : ""} ${theme}`}>
+      {inLink ? (
+        <IconButton onClick={()=>{
+          navigate('/')
+        }} className={`back_icon ${theme}`}>
+          <KeyboardBackspaceIcon fontSize="large"/>
+        </IconButton>
+      ) : (
+        ""
+      )}
+      <div className="header_name">
         <p>CINEMA REVIEWER</p>
       </div>
       {search ? (
@@ -77,15 +89,16 @@ export default function Header() {
         </form>
       ) : (
         <div className="header_actions">
-          <p onClick={handleSearch}>
+          <IconButton className={`searchIcon ${theme}`} onClick={handleSearch}>
             <SearchIcon />
-          </p>
-          <p onClick={handleMode}>
-            {isDark ? <DarkModeIcon /> : <LightModeIcon />}
-          </p>
-          <p onClick={handleMenu} style={{ cursor: "pointer" }}>
+          </IconButton>
+          <IconButton
+            className={`accountIcon ${theme}`}
+            onClick={handleMenu}
+            style={{ cursor: "pointer" }}
+          >
             <AccountCircleIcon />
-          </p>
+          </IconButton>
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
@@ -102,6 +115,9 @@ export default function Header() {
               </Button>
             </MenuItem>
           </Menu>
+          <IconButton className={`themeToggler ${theme}`} onClick={handleMode}>
+            {isDark ? <DarkModeIcon /> : <LightModeIcon />}
+          </IconButton>
         </div>
       )}
     </header>

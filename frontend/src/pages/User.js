@@ -11,7 +11,7 @@ export default function UserPage() {
     <>
       {isLoggedIn ? (
         <div className="page_user">
-          <Header />
+          <Header inLink={false}/>
           <Hero />
           <List />
         </div>

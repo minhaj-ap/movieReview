@@ -36,8 +36,8 @@ export default function MovieList({ props }) {
         ) : (
           props.movieDetails &&
           props.movieDetails.map((e) => (
-            <div className="list_item" key={e.id}>
-              <div className="list_content">
+            <div className={`${theme} list_item`} key={e.id}>
+              <div className={`${theme} list_content`}>
                 <img src={baseUrl + e.imageLink} alt={e.title} />
                 <h3>{e.title}</h3>
                 <h6>{e.desc}</h6>

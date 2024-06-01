@@ -20,7 +20,7 @@ export default function List() {
     fetchData();
   }, []);
   return (
-    <div className={` list-container`}>
+    <div className={`${theme} list-container`}>
       {movies.map((e,index) => (
         <MovieList props={e} key={index}/>
       ))}

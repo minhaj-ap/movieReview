@@ -1,12 +1,12 @@
 const { MongoClient } = require("mongodb");
-const url =
-  process.env.MONGODB_URI
+require("dotenv").config();
+const url = process.env.MONGODB_URI;
 const dbName = "Movies";
 let db;
 async function connectDb() {
   const options = {
     useNewUrlParser: true,
-  };
+  }
   const client = new MongoClient(url, options);
   await client.connect();
   db = client.db(dbName);

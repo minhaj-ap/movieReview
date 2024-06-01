@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
 const bodyParser = require("body-parser");
 const { connectDb } = require("./db");
 const {
@@ -50,8 +51,8 @@ app.get("/search", async (req, res) => {
 });
 
 app.get("/get-movies-all", async (req, res) => {
-  const result = await isBanned(req.query.user)
-  if(result) return res.status(403).json({isBanned: true})
+  const result = await isBanned(req.query.user);
+  if (result) return res.status(403).json({ isBanned: true });
   try {
     const movieResult = await getAllMovie();
     res.json(movieResult);
@@ -358,7 +359,7 @@ app.delete("/ban-user", async (req, res) => {
     });
   }
 });
-app.post("/unban-user", async (req,res)=>{
+app.post("/unban-user", async (req, res) => {
   try {
     const result = await unBanUser(req.body);
     res.status(200).json(result);
@@ -369,7 +370,7 @@ app.post("/unban-user", async (req,res)=>{
       error: error,
     });
   }
-})
+});
 app.get("/test", async (req, res) => {
   try {
     const result = await getBannedUsers();

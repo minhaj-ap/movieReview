@@ -28,7 +28,9 @@ function GenresClassify() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch(`http://localhost:3001/genres-with-movie`);
+        const response = await fetch(
+          `https://moviereview-8vcv.onrender.com/genres-with-movie`
+        );
         const data = await response.json();
         setGenres(data);
         data.forEach((document, index) => {
@@ -49,7 +51,7 @@ function GenresClassify() {
       name: genreName,
       id: parseInt(genreId),
     };
-    await fetch("http://localhost:3001/add-genre", {
+    await fetch("https://moviereview-8vcv.onrender.com/add-genre", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

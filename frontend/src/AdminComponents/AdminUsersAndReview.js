@@ -22,7 +22,7 @@ function TotalUserAndReviews() {
     async function fetchData() {
       try {
         const response = await fetch(
-          "http://localhost:3001/get-users-and-reviews"
+          "https://moviereview-8vcv.onrender.com/get-users-and-reviews"
         );
         const data = await response.json();
         console.log(data);
@@ -35,7 +35,7 @@ function TotalUserAndReviews() {
     fetchData();
   }, [fetchNew]);
   async function banUser(data) {
-    await fetch("http://localhost:3001/ban-user", {
+    await fetch("https://moviereview-8vcv.onrender.com/ban-user", {
       method: "DELETE",
       headers: {
         "Content-type": "application/json",
@@ -49,7 +49,7 @@ function TotalUserAndReviews() {
     setFetchNew(true);
   }
   async function unBanUser(e) {
-    await fetch("http://localhost:3001/unban-user", {
+    await fetch("https://moviereview-8vcv.onrender.com/unban-user", {
       method: "POST",
       headers: {
         "Content-type": "application/json",

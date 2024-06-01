@@ -1,6 +1,6 @@
 const { MongoClient } = require("mongodb");
 const url =
-  "mongodb+srv://minhajap00:pUUchraRZfpEqUFJ@entriproject.wnfci6m.mongodb.net/?retryWrites=true&w=majority&appName=entriProject";
+  process.env.MONGODB_URI
 const dbName = "Movies";
 let db;
 async function connectDb() {

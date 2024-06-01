@@ -17,13 +17,13 @@ import {
 import { ThemeContext } from "../functions/ThemeContext";
 import { AuthContext } from "../functions/AuthContext";
 import { useNavigate } from "react-router-dom";
-export default function Header({inLink}) {
+export default function Header({ inLink }) {
   const [isDark, setisDark] = useState(false);
   const { toggleTheme } = useContext(ThemeContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const { logout, user } = useContext(AuthContext);
   const [search, setSearch] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   function handleSearch() {
     setSearch((prev) => !prev);
   }
@@ -42,7 +42,7 @@ export default function Header({inLink}) {
   function searchFunc(e) {
     e.preventDefault();
     const searchTerm = document.getElementById("searchInput").value;
-    const baseUrl = "http://localhost:3001/search"; 
+    const baseUrl = "https://moviereview-8vcv.onrender.com/search";
     const url = `${baseUrl}?query=${encodeURIComponent(searchTerm)}`;
 
     fetch(url)
@@ -57,15 +57,18 @@ export default function Header({inLink}) {
     logout();
   };
   const size = useTheme();
-  console.log(inLink)
+  console.log(inLink);
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   return (
     <header className={`${search && isMobile ? "header_col" : ""} ${theme}`}>
       {inLink ? (
-        <IconButton onClick={()=>{
-          navigate('/')
-        }} className={`back_icon ${theme}`}>
-          <KeyboardBackspaceIcon fontSize="large"/>
+        <IconButton
+          onClick={() => {
+            navigate("/");
+          }}
+          className={`back_icon ${theme}`}
+        >
+          <KeyboardBackspaceIcon fontSize="large" />
         </IconButton>
       ) : (
         ""

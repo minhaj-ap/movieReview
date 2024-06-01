@@ -42,7 +42,7 @@ export default function Login({ type }) {
           email: email,
           password: pass,
         };
-        await fetch("http://localhost:3001/signup", {
+        await fetch("https://moviereview-8vcv.onrender.com/signup", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export default function Login({ type }) {
           });
       } else if (ActiveOption === 2) {
         const data = { email: email, password: pass };
-        await fetch("http://localhost:3001/login", {
+        await fetch("https://moviereview-8vcv.onrender.com/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -108,7 +108,7 @@ export default function Login({ type }) {
       }
     } else if (type === "admin") {
       const data = { password: pass };
-      await fetch("http://localhost:3001/admin-login", {
+      await fetch("https://moviereview-8vcv.onrender.com/admin-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

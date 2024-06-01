@@ -8,7 +8,7 @@ export default function List() {
     async function fetchData() {
       try {
         const response = await fetch(
-          `http://localhost:3001/genres-with-full-movie`
+          `https://moviereview-8vcv.onrender.com/genres-with-full-movie`
         );
         const data = await response.json();
         setMovies(data);
@@ -21,8 +21,8 @@ export default function List() {
   }, []);
   return (
     <div className={`${theme} list-container`}>
-      {movies.map((e,index) => (
-        <MovieList props={e} key={index}/>
+      {movies.map((e, index) => (
+        <MovieList props={e} key={index} />
       ))}
     </div>
   );

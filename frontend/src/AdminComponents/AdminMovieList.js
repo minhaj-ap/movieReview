@@ -22,7 +22,9 @@ export default function MovieList() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch(`http://localhost:3001/get-movies-all`);
+        const response = await fetch(
+          `https://moviereview-8vcv.onrender.com/get-movies-all`
+        );
         const data = await response.json();
         console.log(data);
         setMovies(data);
@@ -56,7 +58,7 @@ export default function MovieList() {
   async function deleteMovie(e) {
     console.log("triggered");
     const response = await fetch(
-      `http://localhost:3001/delete-movie/${e._id}`,
+      `https://moviereview-8vcv.onrender.com/delete-movie/${e._id}`,
       {
         method: "DELETE",
         headers: {

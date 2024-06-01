@@ -76,7 +76,9 @@ export default function MovieModifier(props) {
   useEffect(() => {
     async function fetchOptions() {
       try {
-        const response = await fetch("http://localhost:3001/get-all-genres");
+        const response = await fetch(
+          "https://moviereview-8vcv.onrender.com/get-all-genres"
+        );
         const data = await response.json();
         const initialStatus = {};
         data.forEach((option) => {
@@ -123,7 +125,9 @@ export default function MovieModifier(props) {
       genre_ids: checkedOptions,
     };
     await fetch(
-      `http://localhost:3001/${props.type === "Add" ? "add" : "edit"}-movie`,
+      `https://moviereview-8vcv.onrender.com/${
+        props.type === "Add" ? "add" : "edit"
+      }-movie`,
       {
         method: "POST",
         headers: {
@@ -177,7 +181,7 @@ export default function MovieModifier(props) {
           >
             <Grid item xs={6} sm={4} sx={{ width: "100%" }}>
               {options.length ? (
-                options.map((e,index) => (
+                options.map((e, index) => (
                   <FormControlLabel
                     value="start"
                     key="index"

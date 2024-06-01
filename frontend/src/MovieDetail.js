@@ -28,7 +28,7 @@ export default function MovieDetail() {
     async function fetchData() {
       try {
         const response = await fetch(
-          `http://localhost:3001/movie-details/${id.id}`
+          `https://moviereview-8vcv.onrender.com/movie-details/${id.id}`
         );
         const data = await response.json();
         setMovieData(data);
@@ -54,17 +54,20 @@ export default function MovieDetail() {
   };
   const addRating = async (e) => {
     try {
-      const response = await fetch("http://localhost:3001/add-rating", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: uid,
-          movieId: id.id,
-          rating: rating,
-        }),
-      });
+      const response = await fetch(
+        "https://moviereview-8vcv.onrender.com/add-rating",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: uid,
+            movieId: id.id,
+            rating: rating,
+          }),
+        }
+      );
       const data = await response.json();
       console.log(data);
       setOpenSaveRating(false);
@@ -77,7 +80,7 @@ export default function MovieDetail() {
     console.log("triggered");
     try {
       const response = await fetch(
-        `http://localhost:3001/edit-review/${moviesReviewedByUser[0]._id}`,
+        `https://moviereview-8vcv.onrender.com/edit-review/${moviesReviewedByUser[0]._id}`,
         {
           method: "POST",
           headers: {
@@ -113,17 +116,20 @@ export default function MovieDetail() {
   }, [movieData, uid]);
   const addReview = async () => {
     try {
-      const response = await fetch("http://localhost:3001/add-review/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: uid,
-          movieId: id.id,
-          review: userReview,
-        }),
-      });
+      const response = await fetch(
+        "https://moviereview-8vcv.onrender.com/add-review/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: uid,
+            movieId: id.id,
+            review: userReview,
+          }),
+        }
+      );
       const data = await response.json();
       console.log(data);
       setMoviesReviewedByUser([{ review: userReview }]);
@@ -135,7 +141,7 @@ export default function MovieDetail() {
   const deleteReview = async (e) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/delete-review/${moviesReviewedByUser[0]._id}`,
+        `https://moviereview-8vcv.onrender.com/delete-review/${moviesReviewedByUser[0]._id}`,
         {
           method: "DELETE",
           headers: {
@@ -152,7 +158,7 @@ export default function MovieDetail() {
     "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
   return (
     <>
-      <Header inLink={true}/>
+      <Header inLink={true} />
       {movieData.map((e, index) => (
         <div className={`movie_details_container ${theme}`} key={index}>
           <div className={`movie_details_shower ${theme}`}>

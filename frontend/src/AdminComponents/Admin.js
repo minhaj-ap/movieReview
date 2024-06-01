@@ -11,7 +11,7 @@ export default function AdminHome() {
   const [recentUsers, setRecentusers] = useState([]);
   useEffect(() => {
     async function fetchData() {
-      await fetch("http://localhost:3001/stats")
+      await fetch("https://moviereview-8vcv.onrender.com/stats")
         .then((res) => res.json())
         .then((data) => setData(data))
         .catch((err) => console.error(err));

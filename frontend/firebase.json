@@ -1,0 +1,13 @@
+{
+  "hosting": {
+    "public": "build",
+    "site": "movie-review-minhaj",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

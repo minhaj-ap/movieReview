@@ -35,7 +35,7 @@ require("dotenv").config();
 const app = express();
 const PORT = 3001;
 
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({ origin: "https://movie-review-minhaj.web.app" }));
 app.use(bodyParser.json());
 app.get("/search", async (req, res) => {
   try {
@@ -351,7 +351,7 @@ app.get("/get-users-and-reviews", async (req, res) => {
 });
 app.delete("/ban-user", async (req, res) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
     const result = await banUser(req.body);
     res.status(200).json(result);
   } catch (error) {

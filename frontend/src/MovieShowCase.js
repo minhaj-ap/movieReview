@@ -10,8 +10,6 @@ export default function MovieShowcase({ e, isAdmin, isSearch }) {
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   const baseUrl =
     "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
-  console.log(e);
-  console.log(isAdmin);
   return (
     <div className={`movie_details_shower ${isAdmin ? admin_theme : theme}`}>
       <div className="movie_details_image">

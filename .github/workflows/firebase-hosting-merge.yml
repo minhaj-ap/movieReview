@@ -19,4 +19,5 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENTRI_PROJECTS }}
           channelId: live
+          working-directory: frontend
           projectId: entri-projects

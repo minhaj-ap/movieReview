@@ -69,8 +69,9 @@ function TotalUserAndReviews() {
         type,
       }),
     });
-    setOpenConfirm(false);
     setFetchNew(true);
+    setOpenConfirm(false);
+    setOpenDeleteConfirm(false)
   }
   async function unBanUser(e) {
     await fetch("https://moviereview-8vcv.onrender.com/unban-user", {

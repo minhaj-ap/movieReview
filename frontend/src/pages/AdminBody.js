@@ -32,10 +32,10 @@ export default function AdminBody() {
           <h1>DASHBOARD</h1>
         </div>
         <div style={{ minWidth: "20%" }}>
-          <IconButton onClick={handleMode}>
+          <IconButton onClick={handleMode} className={`themeToggler admin ${admin_theme}`}>
             {isDark ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
-          <IconButton onClick={handleMenu} style={{ cursor: "pointer" }}>
+          <IconButton onClick={handleMenu} className={`accountIcon admin ${admin_theme}`}>
             <AccountCircleIcon />
           </IconButton>
           <Menu
@@ -55,30 +55,30 @@ export default function AdminBody() {
           </Menu>
         </div>
       </header>
-      <main className="page_admin">
+      <main className={`page_admin ${admin_theme}`}>
         <Outlet />
       </main>
-      <footer className="admin footer">
+      <footer className={`admin footer ${admin_theme}`}>
         <div>
           <h3>Links</h3>
           <div className="footer_actions">
             <Grid container gap={1}>
-              <Grid item xs={12} sm={4} md={3} className="footer_link">
+              <Grid item xs={12} sm={4} md={3} className={`footer_link ${admin_theme}`}>
                 <Link to="/admin">
                   <p>/</p>
                 </Link>
               </Grid>
-              <Grid item xs={12} sm={4} md={3} className="footer_link">
+              <Grid item xs={12} sm={4} md={3} className={`footer_link ${admin_theme}`}>
                 <Link to="/admin/your-movies">
                   <p>/your-movies</p>
                 </Link>
               </Grid>
-              <Grid item xs={12} sm={4} md={3} className="footer_link">
+              <Grid item xs={12} sm={4} md={3} className={`footer_link ${admin_theme}`}>
                 <Link to="/admin/your-genres">
                   <p>/your-genres</p>
                 </Link>
               </Grid>
-              <Grid item xs={12} sm={4} md={3} className="footer_link">
+              <Grid item xs={12} sm={4} md={3} className={`footer_link ${admin_theme}`}>
                 <Link to="/admin/users-and-reviews">
                   <p>/users-and-reviews</p>
                 </Link>

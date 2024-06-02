@@ -16,14 +16,13 @@ export default function MovieList() {
   const [formType, setFormType] = useState("");
   const [fetchNew, setFetchNew] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
-  const { theme } = useContext(ThemeContext);
   const size = useTheme();
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   useEffect(() => {
     async function fetchData() {
       try {
         const response = await fetch(
-          `https://moviereview-8vcv.onrender.com/get-movies-all`
+          `http://localhost:3001/get-movies-all`
         );
         const data = await response.json();
         console.log(data);

@@ -51,8 +51,10 @@ app.get("/search", async (req, res) => {
 });
 
 app.get("/get-movies-all", async (req, res) => {
-  const result = await isBanned(req.query.user);
-  if (result) return res.status(403).json({ isBanned: true });
+  if (req.query.user) {
+    const result = await isBanned(req.query.user);
+    if (result) return res.status(403).json({ isBanned: true });
+  }
   try {
     const movieResult = await getAllMovie();
     res.json(movieResult);

@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Header from "./components/Header";
 import {
   Stack,
@@ -17,6 +17,7 @@ import ReviewTile from "./components/reviewTile";
 import ConfirmDialog from "./ConfirmBox";
 import { ThemeContext } from "./functions/ThemeContext";
 import { AdminThemeContext } from "./functions/AdminThemeContext";
+import MovieShowcase from "./MovieShowCase";
 export default function MovieDetail({ isAdmin }) {
   const [movieData, setMovieData] = useState([]);
   const [openSaveRating, setOpenSaveRating] = useState(false);
@@ -36,7 +37,7 @@ export default function MovieDetail({ isAdmin }) {
         setMovieData(data);
       } catch (error) {
         console.log(error);
-        alert("An unexpected error occured")
+        alert("An unexpected error occured");
       }
     }
     fetchData();
@@ -76,7 +77,7 @@ export default function MovieDetail({ isAdmin }) {
       setMoviesRatedByUser(rating);
     } catch (error) {
       console.log(error);
-      alert("An unexpected error occurred")
+      alert("An unexpected error occurred");
     }
   };
   const editReview = async () => {
@@ -164,8 +165,6 @@ export default function MovieDetail({ isAdmin }) {
       alert("An unexpected error occurred");
     }
   };
-  const baseUrl =
-    "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
   return (
     <>
       <Header inLink={true} />
@@ -174,43 +173,7 @@ export default function MovieDetail({ isAdmin }) {
           className={`movie_details_container ${isAdmin ? admin_theme : theme}`}
           key={index}
         >
-          <div
-            className={`movie_details_shower ${isAdmin ? admin_theme : theme}`}
-          >
-            <div className="movie_details_image">
-              <img src={baseUrl + e.imageLink} alt="" />
-            </div>
-            <div
-              className={`movie_details_info ${isAdmin ? admin_theme : theme}`}
-            >
-              <h4>
-                Title:<span>{e.title}</span>
-              </h4>
-              <h4>
-                Description:<span>{e.desc}</span>
-              </h4>
-              <h4>
-                No of ratings:<span>{e.NoOfRatings}</span>
-              </h4>
-              <h4>
-                Current rating<span>{e.currentRating}</span>
-              </h4>
-              <ul>
-                Genres:
-                {e.genreDetails.map((e, index) => (
-                  <li key={index}>{e.name}</li>
-                ))}
-              </ul>
-              {isAdmin && (
-                <Button
-                  variant="outlined"
-                  sx={{ color: "white !important", fontWeight: "bold" }}
-                >
-                  <Link to="/admin/your-movies">EDIT THIS MOVIE</Link>
-                </Button>
-              )}
-            </div>
-          </div>
+          <MovieShowcase e={e} isAdmin={isAdmin} />
           {!isAdmin && (
             <div
               className={`user_rating_review ${isAdmin ? admin_theme : theme}`}

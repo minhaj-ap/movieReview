@@ -42,16 +42,7 @@ export default function Header({ inLink }) {
   function searchFunc(e) {
     e.preventDefault();
     const searchTerm = document.getElementById("searchInput").value;
-    const baseUrl = "https://moviereview-8vcv.onrender.com/search";
-    const url = `${baseUrl}?query=${encodeURIComponent(searchTerm)}`;
-
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {})
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        alert(error.message);
-      });
+    navigate(`/search/${searchTerm}`);
   }
   const handleLogout = () => {
     logout();

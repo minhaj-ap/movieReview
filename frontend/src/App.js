@@ -10,6 +10,7 @@ import AdminPage from "./pages/Admin";
 import UserPage from "./pages/User";
 import MovieDetail from "./MovieDetail";
 import { AuthContext } from "./functions/AuthContext";
+import SearchPage from "./components/SearchPage";
 function App() {
   return (
     <Router>
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           <Route exact path="/" element={<UserPage />} />
           <Route path="/movie/:id" element={CheckAuth(MovieDetail)} />
+          <Route path="/search/:key" element={CheckAuth(SearchPage)} />
           <Route path="/admin" element={<AdminPage />}>
             <Route index element={<AdminHome />} />
             <Route path="movie/:id" element={<MovieDetail isAdmin={true} />} />

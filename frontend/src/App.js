@@ -19,6 +19,7 @@ function App() {
           <Route path="/movie/:id" element={CheckAuth(MovieDetail)} />
           <Route path="/admin" element={<AdminPage />}>
             <Route index element={<AdminHome />} />
+            <Route path="movie/:id" element={<MovieDetail isAdmin={true} />} />
             <Route path="your-movies" element={<MovieList />} />
             <Route path="users-and-reviews" element={<TotalUserAndReviews />} />
             <Route path="your-genres" element={<GenresClassify />} />

@@ -6,7 +6,6 @@ import { AuthContext } from "../functions/AuthContext";
 import Login from "../LoginPage";
 export default function UserPage() {
   const { isLoggedIn } = useContext(AuthContext);
-  console.log(isLoggedIn)
   return (
     <>
       {isLoggedIn ? (

@@ -20,7 +20,6 @@ function AuthProvider(props) {
 
   const login = (info) => {
     setIsLoggedIn(true);
-    console.log(info);
     setUser(info.user.name);
     setUid(info.user.id);
     localStorage.setItem("user", JSON.stringify(info.user.name));

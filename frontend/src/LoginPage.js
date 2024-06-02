@@ -59,7 +59,6 @@ export default function Login({ type }) {
             });
           })
           .then((data) => {
-            console.log(data);
             if (data.message === "Success") {
               const user = {
                 name: name,

@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Header from "./components/Header";
 import {
   Stack,
@@ -16,7 +16,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ReviewTile from "./components/reviewTile";
 import ConfirmDialog from "./ConfirmBox";
 import { ThemeContext } from "./functions/ThemeContext";
-export default function MovieDetail() {
+import { AdminThemeContext } from "./functions/AdminThemeContext";
+export default function MovieDetail({ isAdmin }) {
   const [movieData, setMovieData] = useState([]);
   const [openSaveRating, setOpenSaveRating] = useState(false);
   const [openSaveReview, setOpenSaveReview] = useState(false);
@@ -24,6 +25,7 @@ export default function MovieDetail() {
   const id = useParams();
   const { uid } = useContext(AuthContext);
   const { theme } = useContext(ThemeContext);
+  const { admin_theme } = useContext(AdminThemeContext);
   useEffect(() => {
     async function fetchData() {
       try {
@@ -34,6 +36,7 @@ export default function MovieDetail() {
         setMovieData(data);
       } catch (error) {
         console.log(error);
+        alert("An unexpected error occured")
       }
     }
     fetchData();
@@ -48,7 +51,6 @@ export default function MovieDetail() {
     setRating(e.target.value);
     setOpenSaveRating(false);
   };
-  console.log(moviesReviewedByUser);
   const handleReview = (e) => {
     setNewReview(e.target.value);
   };
@@ -74,10 +76,10 @@ export default function MovieDetail() {
       setMoviesRatedByUser(rating);
     } catch (error) {
       console.log(error);
+      alert("An unexpected error occurred")
     }
   };
   const editReview = async () => {
-    console.log("triggered");
     try {
       const response = await fetch(
         `https://moviereview-8vcv.onrender.com/edit-review/${moviesReviewedByUser[0]._id}`,
@@ -96,24 +98,29 @@ export default function MovieDetail() {
     } catch (error) {}
   };
   useEffect(() => {
-    if (movieData.length) {
-      if (movieData[0].ratings) {
-        const ratedMovies = movieData
-          .flatMap((movie) => movie.ratings)
-          .filter((rating) => rating.userId === uid)
-          .map((rating) => rating.rating);
-        setMoviesRatedByUser(parseFloat(ratedMovies));
+    if (!isAdmin) {
+      if (movieData.length) {
+        if (movieData[0].ratings) {
+          const ratedMovies = movieData
+            .flatMap((movie) => movie.ratings)
+            .filter((rating) => rating.userId === uid)
+            .map((rating) => rating.rating);
+          setMoviesRatedByUser(parseFloat(ratedMovies));
+        }
+        const reviewedMovies = movieData
+          .flatMap((movie) => movie.combinedReviews)
+          .filter((reviews) => reviews.userId === uid);
+        setMoviesReviewedByUser(reviewedMovies);
+        const otherReviews = movieData[0].combinedReviews.filter(
+          (review) => review.userId !== uid
+        );
+        setReviews(otherReviews);
       }
-      const reviewedMovies = movieData
-        .flatMap((movie) => movie.combinedReviews)
-        .filter((reviews) => reviews.userId === uid);
-      setMoviesReviewedByUser(reviewedMovies);
-      const otherReviews = movieData[0].combinedReviews.filter(
-        (review) => review.userId !== uid
-      );
-      setReviews(otherReviews);
     }
-  }, [movieData, uid]);
+    if (isAdmin) {
+      setReviews(movieData[0] ? movieData[0].combinedReviews : []);
+    }
+  }, [movieData, uid, isAdmin]);
   const addReview = async () => {
     try {
       const response = await fetch(
@@ -153,8 +160,8 @@ export default function MovieDetail() {
       setOpenConfirm(false);
       setMoviesReviewedByUser([]);
     } catch (error) {
-      console.log(error)
-      alert("An unexpected error occurred")
+      console.log(error);
+      alert("An unexpected error occurred");
     }
   };
   const baseUrl =
@@ -163,12 +170,19 @@ export default function MovieDetail() {
     <>
       <Header inLink={true} />
       {movieData.map((e, index) => (
-        <div className={`movie_details_container ${theme}`} key={index}>
-          <div className={`movie_details_shower ${theme}`}>
+        <div
+          className={`movie_details_container ${isAdmin ? admin_theme : theme}`}
+          key={index}
+        >
+          <div
+            className={`movie_details_shower ${isAdmin ? admin_theme : theme}`}
+          >
             <div className="movie_details_image">
               <img src={baseUrl + e.imageLink} alt="" />
             </div>
-            <div className={`movie_details_info ${theme}`}>
+            <div
+              className={`movie_details_info ${isAdmin ? admin_theme : theme}`}
+            >
               <h4>
                 Title:<span>{e.title}</span>
               </h4>
@@ -187,32 +201,114 @@ export default function MovieDetail() {
                   <li key={index}>{e.name}</li>
                 ))}
               </ul>
+              {isAdmin && (
+                <Button
+                  variant="outlined"
+                  sx={{ color: "white !important", fontWeight: "bold" }}
+                >
+                  <Link to="/admin/your-movies">EDIT THIS MOVIE</Link>
+                </Button>
+              )}
             </div>
           </div>
-          <div className={`user_rating_review ${theme}`}>
-            {moviesRatedByUser ? (
-              <div className="user_rating">
-                <div className="user_review_header">
-                  <p>YOUR RATING</p>
-                  <IconButton
-                    onClick={() => {
-                      setOpenSaveRating(!openSaveRating);
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
+          {!isAdmin && (
+            <div
+              className={`user_rating_review ${isAdmin ? admin_theme : theme}`}
+            >
+              {moviesRatedByUser ? (
+                <div className="user_rating">
+                  <div className="user_review_header">
+                    <p>YOUR RATING</p>
+                    <IconButton
+                      onClick={() => {
+                        setOpenSaveRating(!openSaveRating);
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </div>
+                  <Stack spacing={1}>
+                    <Rating
+                      defaultValue={moviesRatedByUser}
+                      precision={0.5}
+                      value={rating}
+                      readOnly={!openSaveRating}
+                      fontSize="large"
+                      onChange={handleRating}
+                    />
+                  </Stack>
+                  {openSaveRating && (
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      onClick={addRating}
+                    >
+                      SAVE
+                    </Button>
+                  )}
                 </div>
-                <Stack spacing={1}>
-                  <Rating
-                    defaultValue={moviesRatedByUser}
-                    precision={0.5}
-                    value={rating}
-                    readOnly={!openSaveRating}
-                    fontSize="large"
-                    onChange={handleRating}
-                  />
-                </Stack>
-                {openSaveRating && (
+              ) : (
+                ""
+              )}
+              {moviesReviewedByUser[0] ? (
+                <div className="user_review">
+                  <div className="user_review_header">
+                    <p>YOUR REVIEW</p>
+                    <div style={{ display: "flex" }}>
+                      <IconButton
+                        onClick={() => setOpenSaveReview(!openSaveReview)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton onClick={() => setOpenConfirm(true)}>
+                        <DeleteIcon />
+                      </IconButton>
+                      <ConfirmDialog
+                        open={openConfirm}
+                        handleClose={() => setOpenConfirm(false)}
+                        handleConfirm={() => {
+                          deleteReview();
+                        }}
+                        text="delete review"
+                      />
+                    </div>
+                  </div>
+                  {openSaveReview ? (
+                    <TextField
+                      id=""
+                      label=""
+                      value={newReview || moviesReviewedByUser[0].review}
+                      onChange={handleReview}
+                    />
+                  ) : (
+                    <span>{newReview || moviesReviewedByUser[0].review}</span>
+                  )}
+
+                  {openSaveReview && (
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      onClick={editReview}
+                    >
+                      SAVE
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                ""
+              )}
+              {!moviesRatedByUser && (
+                <div className={`non_rating ${isAdmin ? admin_theme : theme}`}>
+                  <p>Rate now</p>
+                  <Stack spacing={1} sx={{ margin: "auto" }}>
+                    <Rating
+                      defaultValue={moviesRatedByUser}
+                      precision={0.5}
+                      value={rating}
+                      fontSize="large"
+                      onChange={handleRating}
+                    />
+                  </Stack>
                   <Button
                     variant="outlined"
                     color="inherit"
@@ -220,84 +316,19 @@ export default function MovieDetail() {
                   >
                     SAVE
                   </Button>
-                )}
-              </div>
-            ) : (
-              ""
-            )}
-            {moviesReviewedByUser[0] ? (
-              <div className="user_review">
-                <div className="user_review_header">
-                  <p>YOUR REVIEW</p>
-                  <div style={{ display: "flex" }}>
-                    <IconButton
-                      onClick={() => setOpenSaveReview(!openSaveReview)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => setOpenConfirm(true)}>
-                      <DeleteIcon />
-                    </IconButton>
-                    <ConfirmDialog
-                      open={openConfirm}
-                      handleClose={() => setOpenConfirm(false)}
-                      handleConfirm={() => {
-                        deleteReview();
-                      }}
-                      text="delete review"
-                    />
-                  </div>
                 </div>
-                {openSaveReview ? (
-                  <TextField
-                    id=""
-                    label=""
-                    value={newReview || moviesReviewedByUser[0].review}
-                    onChange={handleReview}
-                  />
-                ) : (
-                  <span>{newReview || moviesReviewedByUser[0].review}</span>
-                )}
+              )}
+              {!moviesReviewedByUser[0] && (
+                <div className="non_review">
+                  <h4>POST YOUR REVIEW NOW</h4>
+                </div>
+              )}
+            </div>
+          )}
 
-                {openSaveReview && (
-                  <Button
-                    variant="outlined"
-                    color="inherit"
-                    onClick={editReview}
-                  >
-                    SAVE
-                  </Button>
-                )}
-              </div>
-            ) : (
-              ""
-            )}
-            {!moviesRatedByUser && (
-              <div className={`non_rating ${theme}`}>
-                <p>Rate now</p>
-                <Stack spacing={1} sx={{ margin: "auto" }}>
-                  <Rating
-                    defaultValue={moviesRatedByUser}
-                    precision={0.5}
-                    value={rating}
-                    fontSize="large"
-                    onChange={handleRating}
-                  />
-                </Stack>
-                <Button variant="outlined" color="inherit" onClick={addRating}>
-                  SAVE
-                </Button>
-              </div>
-            )}
-            {!moviesReviewedByUser[0] && (
-              <div className="non_review">
-                <h4>POST YOUR REVIEW NOW</h4>
-              </div>
-            )}
-          </div>
-          <div className={`review_section ${theme}`}>
+          <div className={`review_section ${isAdmin ? admin_theme : theme}`}>
             <h3>Reviews</h3>
-            {!moviesReviewedByUser[0] && (
+            {!isAdmin && !moviesReviewedByUser[0] && (
               <TextField
                 label="ADD YOUR REVIEW"
                 helperText="POST YOUR REVIEW HERE"
@@ -318,7 +349,9 @@ export default function MovieDetail() {
               />
             )}
             {reviews.length ? (
-              reviews.map((e, index) => <ReviewTile data={e} key={index} />)
+              reviews.map((e, index) => (
+                <ReviewTile isAdmin={isAdmin} data={e} key={index} />
+              ))
             ) : (
               <strong style={{ textAlign: "center", fontStyle: "italic" }}>
                 NO REVIEWS TO SHOW

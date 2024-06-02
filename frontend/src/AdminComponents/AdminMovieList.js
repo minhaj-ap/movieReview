@@ -1,13 +1,13 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { Skeleton, IconButton, Grid } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import { ThemeContext } from "../functions/ThemeContext";
 import MovieModifier from "./subComponents/movieModifier";
 import ConfirmDialog from "../ConfirmBox";
 import { useTheme, useMediaQuery } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 export default function MovieList() {
   const [movies, setMovies] = useState([]);
   const [isLoading, setLoading] = useState(true);
@@ -17,12 +17,13 @@ export default function MovieList() {
   const [fetchNew, setFetchNew] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
   const size = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   useEffect(() => {
     async function fetchData() {
       try {
         const response = await fetch(
-          `http://localhost:3001/get-movies-all`
+          "https://moviereview-8vcv.onrender.com/get-movies-all"
         );
         const data = await response.json();
         console.log(data);
@@ -38,6 +39,9 @@ export default function MovieList() {
   const handleForm = () => {
     setShowForm((prev) => !prev);
   };
+  const redirectToMovie = (e) => {
+    navigate(`/admin/movie/${e._id}`);
+  };
   function formData() {
     let data = { type: "Add" };
     if (formType === "Edit") {
@@ -51,11 +55,9 @@ export default function MovieList() {
   function editForm(e) {
     setFormType("Edit");
     setEditData(e);
-    console.log(e);
     setShowForm(true);
   }
   async function deleteMovie(e) {
-    console.log("triggered");
     const response = await fetch(
       `https://moviereview-8vcv.onrender.com/delete-movie/${e._id}`,
       {
@@ -142,7 +144,11 @@ export default function MovieList() {
                   >
                     <EditIcon />
                   </IconButton>
-                  <IconButton>
+                  <IconButton
+                    onClick={() => {
+                      redirectToMovie(e);
+                    }}
+                  >
                     <BarChartIcon />
                   </IconButton>
                   <IconButton

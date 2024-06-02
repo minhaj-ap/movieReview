@@ -57,7 +57,6 @@ export default function Header({ inLink }) {
     logout();
   };
   const size = useTheme();
-  console.log(inLink);
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   return (
     <header className={`${search && isMobile ? "header_col" : ""} ${theme}`}>

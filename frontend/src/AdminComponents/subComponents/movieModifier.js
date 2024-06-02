@@ -112,9 +112,7 @@ export default function MovieModifier(props) {
     let checkedOptions = Object.keys(selectedOptions)
       .filter((key) => selectedOptions[key])
       .map((key) => parseInt(key, 10));
-    console.log(checkedOptions);
     if (!checkedOptions.length) {
-      console.log(true);
       alert("Please select atleast one genre");
       return;
     }

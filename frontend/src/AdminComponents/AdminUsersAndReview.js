@@ -37,7 +37,6 @@ function TotalUserAndReviews() {
     fetchData();
   }, [fetchNew]);
   const deleteReview = async (e) => {
-    console.log(e._id);
     try {
       const response = await fetch(
         `https://moviereview-8vcv.onrender.com/delete-review/${e._id}`,

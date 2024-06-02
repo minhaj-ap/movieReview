@@ -11,10 +11,12 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import BlockIcon from "@mui/icons-material/Block";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
+import ConfirmDialog from "../ConfirmBox";
 function TotalUserAndReviews() {
   const [expanded, setExpanded] = useState(false);
   const [data, setData] = useState([]);
   const [fetchNew, setFetchNew] = useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false);
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
@@ -34,6 +36,26 @@ function TotalUserAndReviews() {
     }
     fetchData();
   }, [fetchNew]);
+  const deleteReview = async (e) => {
+    console.log(e._id);
+    try {
+      const response = await fetch(
+        `https://moviereview-8vcv.onrender.com/delete-review/${e._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-type": "application/json",
+          },
+        }
+      );
+      console.log(response);
+      setOpenConfirm(false);
+      setFetchNew(true);
+    } catch (error) {
+      console.log(error);
+      alert("An unexpected error occurred");
+    }
+  };
   async function banUser(data) {
     await fetch("https://moviereview-8vcv.onrender.com/ban-user", {
       method: "DELETE",
@@ -46,6 +68,7 @@ function TotalUserAndReviews() {
         movieIds: giveData({ type: "movie", data: data }),
       }),
     });
+    setOpenConfirm(false);
     setFetchNew(true);
   }
   async function unBanUser(e) {
@@ -100,9 +123,19 @@ function TotalUserAndReviews() {
                   <SettingsBackupRestoreIcon />
                 </IconButton>
               ) : (
-                <IconButton onClick={() => banUser(e)}>
-                  <BlockIcon sx={{ color: "red" }} />
-                </IconButton>
+                <>
+                  <IconButton onClick={() => setOpenConfirm(true)}>
+                    <BlockIcon sx={{ color: "red" }} />
+                  </IconButton>
+                  <ConfirmDialog
+                    open={openConfirm}
+                    handleClose={() => setOpenConfirm(false)}
+                    handleConfirm={() => {
+                      banUser(e);
+                    }}
+                    text="ban this user"
+                  />
+                </>
               )}
             </Box>
           </AccordionSummary>
@@ -135,7 +168,17 @@ function TotalUserAndReviews() {
                                 </Typography>
                               ))}
                           </div>
-                          <DeleteIcon />
+                          <IconButton onClick={() => setOpenConfirm(true)}>
+                            <DeleteIcon />
+                          </IconButton>
+                          <ConfirmDialog
+                            open={openConfirm}
+                            handleClose={() => setOpenConfirm(false)}
+                            handleConfirm={() => {
+                              deleteReview(review);
+                            }}
+                            text="delete this review"
+                          />
                         </div>
                         <hr />
                       </>

@@ -6,6 +6,7 @@ import StarHalfIcon from "@mui/icons-material/StarHalf";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { AuthContext } from "../functions/AuthContext";
+import { useNavigate } from "react-router-dom";
 export default function Hero() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -13,6 +14,7 @@ export default function Hero() {
   const [loading, setLoading] = useState(true);
   const [movieIndex, setmovieIndex] = useState(0);
   const { uid, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
   const imageUrl =
     "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
   useEffect(() => {
@@ -35,7 +37,7 @@ export default function Hero() {
       }
     }
     fetchData();
-  }, []);
+  }, [logout, uid]);
   function handleIndex(state) {
     if (state === "prev") {
       setmovieIndex(movieIndex - 1);
@@ -43,6 +45,10 @@ export default function Hero() {
       setmovieIndex(movieIndex + 1);
     }
   }
+  const redirect = (index) => {
+    const id = movies[index]._id;
+    navigate(`/movie/${id}`);
+  };
   return (
     <div
       className="hero"
@@ -76,11 +82,19 @@ export default function Hero() {
           )}
         </p>
         <div className="rate_buttons">
-          <button className="rate" style={{ fontSize: FontSize() }}>
+          <button
+            className="rate"
+            style={{ fontSize: FontSize() }}
+            onClick={() => redirect(movieIndex)}
+          >
             Rate Now &nbsp;
             <StarHalfIcon fontSize="small" />
           </button>
-          <button className="review" style={{ fontSize: FontSize() }}>
+          <button
+            className="review"
+            style={{ fontSize: FontSize() }}
+            onClick={() => redirect(movieIndex)}
+          >
             Write a review &nbsp;
             <BorderColorIcon fontSize="small" />
           </button>

@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-function ConfirmDialog({ open, handleClose, handleConfirm }) {
+function ConfirmDialog({ open, handleClose, handleConfirm ,text}) {
   return (
     <Dialog
       open={open}
@@ -17,7 +17,7 @@ function ConfirmDialog({ open, handleClose, handleConfirm }) {
       <DialogTitle id="alert-dialog-title">{"Confirm Action"}</DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description">
-          Are you sure you want to delete this ?
+          Are you sure you want to {text} ?
         </DialogContentText>
       </DialogContent>
       <DialogActions>

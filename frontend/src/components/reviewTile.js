@@ -1,6 +1,6 @@
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-export default function ReviewTile({ type, data }) {
-  console.log(type, data);
+export default function ReviewTile({ data }) {
+  console.log(data)
   return (
     <div className="review_tile">
       <div>

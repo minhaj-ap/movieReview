@@ -152,7 +152,10 @@ export default function MovieDetail() {
       console.log(response);
       setOpenConfirm(false);
       setMoviesReviewedByUser([]);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error)
+      alert("An unexpected error occurred")
+    }
   };
   const baseUrl =
     "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
@@ -241,6 +244,7 @@ export default function MovieDetail() {
                       handleConfirm={() => {
                         deleteReview();
                       }}
+                      text="delete review"
                     />
                   </div>
                 </div>
@@ -313,9 +317,13 @@ export default function MovieDetail() {
                 className="review_Adder"
               />
             )}
-            {reviews.map((e) => (
-              <ReviewTile type="user" data={e} />
-            ))}
+            {reviews.length ? (
+              reviews.map((e, index) => <ReviewTile data={e} key={index} />)
+            ) : (
+              <strong style={{ textAlign: "center", fontStyle: "italic" }}>
+                NO REVIEWS TO SHOW
+              </strong>
+            )}
           </div>
         </div>
       ))}

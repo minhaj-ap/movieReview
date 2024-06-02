@@ -49,16 +49,20 @@ async function deleteReview(id) {
     return error;
   }
 }
-async function banUser(data) {
+async function banUser({ userId, reviewIds, movieIds, type }) {
   const database = await getDb();
-  const userId = data.userId;
-  const reviewIds = data.reviewIds;
-  const movieIds = data.movieIds;
-  const usersCollection = database.collection("users");
-  await usersCollection.updateOne(
-    { _id: new ObjectId(userId) },
-    { $set: { isBanned: true } }
-  );
+  if (type === "delete") {
+    const userCollection = await database
+      .collection("users")
+      .deleteOne({ _id: new ObjectId(userId) });
+    console.log(userCollection);
+  } else if (type === "ban") {
+    const usersCollection = database.collection("users");
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { isBanned: true } }
+    );
+  }
   if (reviewIds) {
     const reviewsCollection = database.collection("reviews");
     await reviewsCollection.deleteMany({
@@ -70,7 +74,7 @@ async function banUser(data) {
     await movieDetailsCollection.updateMany(
       { _id: { $in: movieIds.map((id) => new ObjectId(id)) } },
       { $pull: { reviewIds: { $in: reviewIds.map((id) => new ObjectId(id)) } } }
-    )
+    );
   }
 }
 module.exports = {

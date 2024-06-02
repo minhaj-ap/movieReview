@@ -17,6 +17,7 @@ function TotalUserAndReviews() {
   const [data, setData] = useState([]);
   const [fetchNew, setFetchNew] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
+  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
@@ -55,7 +56,7 @@ function TotalUserAndReviews() {
       alert("An unexpected error occurred");
     }
   };
-  async function banUser(data) {
+  async function banUser(data, type) {
     await fetch("https://moviereview-8vcv.onrender.com/ban-user", {
       method: "DELETE",
       headers: {
@@ -65,6 +66,7 @@ function TotalUserAndReviews() {
         userId: data._id,
         reviewIds: giveData({ type: "review", data: data }),
         movieIds: giveData({ type: "movie", data: data }),
+        type,
       }),
     });
     setOpenConfirm(false);
@@ -117,25 +119,42 @@ function TotalUserAndReviews() {
           >
             <Box className="user_tile">
               <Typography>{e.userName}</Typography>
-              {e.isBanned ? (
-                <IconButton onClick={() => unBanUser(e)}>
-                  <SettingsBackupRestoreIcon />
-                </IconButton>
-              ) : (
-                <>
-                  <IconButton onClick={() => setOpenConfirm(true)}>
-                    <BlockIcon sx={{ color: "red" }} />
+              <div>
+                {e.isBanned ? (
+                  <IconButton onClick={() => unBanUser(e)}>
+                    <SettingsBackupRestoreIcon sx={{ color: "green" }} />
+                  </IconButton>
+                ) : (
+                  <>
+                    <IconButton onClick={() => setOpenConfirm(true)}>
+                      <BlockIcon sx={{ color: "orange" }} />
+                    </IconButton>
+                    <ConfirmDialog
+                      open={openConfirm}
+                      handleClose={() => setOpenConfirm(false)}
+                      handleConfirm={() => {
+                        let type = "ban";
+                        banUser(e, type);
+                      }}
+                      text="ban this user"
+                    />
+                  </>
+                )}
+                <IconButton>
+                  <IconButton onClick={() => setOpenDeleteConfirm(true)}>
+                    <DeleteIcon sx={{ color: "red" }} />
                   </IconButton>
                   <ConfirmDialog
-                    open={openConfirm}
-                    handleClose={() => setOpenConfirm(false)}
+                    open={openDeleteConfirm}
+                    handleClose={() => setOpenDeleteConfirm(false)}
                     handleConfirm={() => {
-                      banUser(e);
+                      let type = "delete";
+                      banUser(e, type);
                     }}
-                    text="ban this user"
+                    text="delete this user"
                   />
-                </>
-              )}
+                </IconButton>
+              </div>
             </Box>
           </AccordionSummary>
           <AccordionDetails>

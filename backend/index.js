@@ -374,23 +374,11 @@ app.post("/unban-user", async (req, res) => {
     });
   }
 });
-app.get("/test", async (req, res) => {
-  try {
-    const result = await getBannedUsers();
-    // const result = await fetch("http://localhost:3001/review", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     user: "6656bf8f6dfe2117334dda54",
-    //     text: "Checking review",
-    //   }),
-    // });
-    res.json(result);
-  } catch (error) {
-    console.log("error", error);
-  }
+app.post("/restart", (req, res) => {
+  res.status(200).send("Server is restarting...");
+  console.log("Server is restarting...");
+  process.exit(0); // To avoid server from inactivity, this end point 
+  // is called every 14 minutes 
 });
 connectDb().then(() => {
   app.listen(PORT, () => {

@@ -16,11 +16,16 @@ function TotalUserAndReviews() {
   const [expanded, setExpanded] = useState(false);
   const [data, setData] = useState([]);
   const [fetchNew, setFetchNew] = useState(false);
-  const [openConfirm, setOpenConfirm] = useState(false);
-  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
+  const [openBanConfirm, setOpenBanConfirm] = useState(false);
+  const [openDeleteUserConfirm, setOpenDeleteUserConfirm] = useState(false);
+  const [openDeleteReviewConfirm, setOpenDeleteReviewConfirm] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedReview, setSelectedReview] = useState(null);
+
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -30,6 +35,7 @@ function TotalUserAndReviews() {
         const data = await response.json();
         console.log(data);
         setData(data);
+        setExpanded(false);
       } catch (error) {
         console.error(error);
         alert(error.message);
@@ -37,10 +43,11 @@ function TotalUserAndReviews() {
     }
     fetchData();
   }, [fetchNew]);
-  const deleteReview = async (e) => {
+
+  const deleteReview = async () => {
     try {
       const response = await fetch(
-        `https://moviereview-8vcv.onrender.com/delete-review/${e._id}`,
+        `https://moviereview-8vcv.onrender.com/delete-review/${selectedReview._id}`,
         {
           method: "DELETE",
           headers: {
@@ -49,30 +56,33 @@ function TotalUserAndReviews() {
         }
       );
       console.log(response);
-      setOpenConfirm(false);
-      setFetchNew(true);
+      setOpenDeleteReviewConfirm(false);
+      setFetchNew((prev) => !prev);
     } catch (error) {
       console.log(error);
       alert("An unexpected error occurred");
     }
   };
-  async function banUser(data, type) {
+
+  const banUser = async (type) => {
+    const user = selectedUser;
     await fetch("https://moviereview-8vcv.onrender.com/ban-user", {
       method: "DELETE",
       headers: {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
-        userId: data._id,
-        reviewIds: giveData({ type: "review", data: data }),
-        movieIds: giveData({ type: "movie", data: data }),
+        userId: user._id,
+        reviewIds: giveData({ type: "review", data: user }),
+        movieIds: giveData({ type: "movie", data: user }),
         type,
       }),
     });
-    setOpenConfirm(false);
-    setFetchNew(true);
-  }
-  async function unBanUser(e) {
+    setOpenBanConfirm(false);
+    setFetchNew((prev) => !prev);
+  };
+
+  const unBanUser = async (e) => {
     await fetch("https://moviereview-8vcv.onrender.com/unban-user", {
       method: "POST",
       headers: {
@@ -82,17 +92,18 @@ function TotalUserAndReviews() {
         userId: e._id,
       }),
     });
-    setFetchNew(true);
-  }
-  function giveData({ type, data }) {
+    setFetchNew((prev) => !prev);
+  };
+
+  const giveData = ({ type, data }) => {
     if (type === "review") {
-      if (data.userReviews[0].movieDetails[0]) {
+      if (data.userReviews[0]?.movieDetails[0]) {
         return data.userReviews.map((e) => e._id);
       } else {
         return null;
       }
     } else if (type === "movie") {
-      if (data.userReviews[0].movieDetails[0]) {
+      if (data.userReviews[0]?.movieDetails[0]) {
         return data.userReviews.flatMap((review) =>
           (review.movieDetails || []).map((movie) => movie._id)
         );
@@ -100,12 +111,13 @@ function TotalUserAndReviews() {
         return null;
       }
     }
-  }
+  };
+
   return (
     <div className="admin genre_drop">
       <h1 style={{ padding: "2em 1em", textAlign: "center", color: "white" }}>
         YOUR USERS AND REVIEWS
-      </h1>{" "}
+      </h1>
       {data.map((e, index) => (
         <Accordion
           expanded={expanded === e.userName}
@@ -126,34 +138,36 @@ function TotalUserAndReviews() {
                   </IconButton>
                 ) : (
                   <>
-                    <IconButton onClick={() => setOpenConfirm(true)}>
+                    <IconButton
+                      onClick={() => {
+                        setSelectedUser(e);
+                        setOpenBanConfirm(true);
+                      }}
+                    >
                       <BlockIcon sx={{ color: "orange" }} />
                     </IconButton>
                     <ConfirmDialog
-                      open={openConfirm}
-                      handleClose={() => setOpenConfirm(false)}
-                      handleConfirm={() => {
-                        let type = "ban";
-                        banUser(e, type);
-                      }}
+                      open={openBanConfirm}
+                      handleClose={() => setOpenBanConfirm(false)}
+                      handleConfirm={() => banUser("ban")}
                       text="ban this user"
                     />
                   </>
                 )}
-                <IconButton>
-                  <IconButton onClick={() => setOpenDeleteConfirm(true)}>
-                    <DeleteIcon sx={{ color: "red" }} />
-                  </IconButton>
-                  <ConfirmDialog
-                    open={openDeleteConfirm}
-                    handleClose={() => setOpenDeleteConfirm(false)}
-                    handleConfirm={() => {
-                      let type = "delete";
-                      banUser(e, type);
-                    }}
-                    text="delete this user"
-                  />
+                <IconButton
+                  onClick={() => {
+                    setSelectedUser(e);
+                    setOpenDeleteUserConfirm(true);
+                  }}
+                >
+                  <DeleteIcon sx={{ color: "red" }} />
                 </IconButton>
+                <ConfirmDialog
+                  open={openDeleteUserConfirm}
+                  handleClose={() => setOpenDeleteUserConfirm(false)}
+                  handleConfirm={() => banUser("delete")}
+                  text="delete this user"
+                />
               </div>
             </Box>
           </AccordionSummary>
@@ -161,53 +175,52 @@ function TotalUserAndReviews() {
             <>
               <Box className="user_details_tile">
                 <Typography>
-                  Banned status :{e.isBanned ? "true" : "false"}
+                  Banned status: {e.isBanned ? "true" : "false"}
                 </Typography>
-                <Typography>Email :{e.userEmail}</Typography>
+                <Typography>Email: {e.userEmail}</Typography>
               </Box>
-            </>
-
-            <AccordionDetails>
-              {e.userReviews.length > 0 &&
-                e.userReviews.map((review, index) => (
-                  <React.Fragment key={index}>
-                    {review.review ? (
-                      <>
-                        <div className="review_info_tile">
-                          <div>
-                            <Typography>
-                              Review: {review.review || "NO DATA"}
-                            </Typography>
-                            {review.movieDetails &&
-                              review.movieDetails.length > 0 &&
-                              review.movieDetails.map((movie, idx) => (
-                                <Typography key={idx}>
-                                  Movie: {movie.title}
-                                </Typography>
-                              ))}
-                          </div>
-                          <IconButton onClick={() => setOpenConfirm(true)}>
-                            <DeleteIcon />
-                          </IconButton>
-                          <ConfirmDialog
-                            open={openConfirm}
-                            handleClose={() => setOpenConfirm(false)}
-                            handleConfirm={() => {
-                              deleteReview(review);
-                            }}
-                            text="delete this review"
-                          />
+              <AccordionDetails>
+                {e.userReviews.length > 0 ? (
+                  e.userReviews.map((review, reviewIndex) => (
+                    <React.Fragment key={reviewIndex}>
+                      <div className="review_info_tile">
+                        <div>
+                          <Typography>
+                            Review: {review.review || "NO DATA"}
+                          </Typography>
+                          {review.movieDetails &&
+                            review.movieDetails.length > 0 &&
+                            review.movieDetails.map((movie, movieIndex) => (
+                              <Typography key={movieIndex}>
+                                Movie: {movie.title}
+                              </Typography>
+                            ))}
                         </div>
-                        <hr />
-                      </>
-                    ) : (
-                      <div style={{ textAlign: "center" }}>
-                        <strong> THE USER HAVE NO REVIEWS</strong>
+                        <IconButton
+                          onClick={() => {
+                            setSelectedReview(review);
+                            setOpenDeleteReviewConfirm(true);
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                        <ConfirmDialog
+                          open={openDeleteReviewConfirm}
+                          handleClose={() => setOpenDeleteReviewConfirm(false)}
+                          handleConfirm={deleteReview}
+                          text="delete this review"
+                        />
                       </div>
-                    )}
-                  </React.Fragment>
-                ))}
-            </AccordionDetails>
+                      <hr />
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <div style={{ textAlign: "center" }}>
+                    <strong> THE USER HAVE NO REVIEWS</strong>
+                  </div>
+                )}
+              </AccordionDetails>
+            </>
           </AccordionDetails>
         </Accordion>
       ))}

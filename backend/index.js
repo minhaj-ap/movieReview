@@ -35,7 +35,7 @@ require("dotenv").config();
 const app = express();
 const PORT = 3001;
 
-app.use(cors({ origin: "https://movie-review-minhaj.web.app" }));
+app.use(cors({}));
 app.use(bodyParser.json());
 app.get("/search", async (req, res) => {
   try {

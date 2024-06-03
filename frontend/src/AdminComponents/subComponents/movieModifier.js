@@ -235,7 +235,7 @@ export default function MovieModifier(props) {
               <img
                 src={baseUrl + imageLink}
                 alt="Loading..."
-                style={{ width: "max-content", height: "max-content" }}
+                style={{ width: "5em", height: "max-content" }}
               />
             )}
 

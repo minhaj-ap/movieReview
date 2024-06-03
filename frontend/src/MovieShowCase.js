@@ -65,7 +65,7 @@ export default function MovieShowcase({ e, isAdmin, isSearch }) {
             {isAdmin && (
               <Button
                 variant="outlined"
-                sx={{ color: "white !important", fontWeight: "bold" }}
+                sx={{ fontWeight: "bold" }}
               >
                 <Link to="/admin/your-movies">EDIT THIS MOVIE</Link>
               </Button>

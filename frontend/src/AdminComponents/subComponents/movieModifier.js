@@ -136,6 +136,7 @@ export default function MovieModifier(props) {
     )
       .then((response) => response.json())
       .then(() => {
+        handleReset();
         props.data(true);
       });
   };

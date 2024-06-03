@@ -568,6 +568,9 @@ div.non_rating.dark span.MuiRating-icon svg.MuiSvgIcon-root {
   display: grid;
   place-content: center;
 }
+.movie_details_image img {
+  width: 10em;
+}
 .movie_details_info > * {
   font-weight: 600;
   font-size: 1.3em;

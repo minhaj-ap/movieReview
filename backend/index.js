@@ -374,7 +374,7 @@ app.post("/unban-user", async (req, res) => {
     });
   }
 });
-app.post("/restart", (req, res) => {
+app.get("/restart", (req, res) => {
   res.status(200).send("Server is restarting...");
   console.log("Server is restarting...");
   process.exit(0); // To avoid server from inactivity, this end point 

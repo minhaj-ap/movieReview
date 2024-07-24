@@ -9,9 +9,9 @@ import { AdminThemeContext } from "../functions/AdminThemeContext";
 export default function AdminBody() {
   const [isDark, setisDark] = useState(false);
   const { toggleAdminTheme, admin_theme } = useContext(AdminThemeContext);
-  const { adminLogout } = useContext(AdminAuthContext);
+  const { isAdminLoggedIn, adminLogout } = useContext(AdminAuthContext);
   const [anchorEl, setAnchorEl] = useState(null);
-
+  console.log(isAdminLoggedIn);
   function handleLogout() {
     adminLogout();
   }
@@ -32,10 +32,16 @@ export default function AdminBody() {
           <h1>DASHBOARD</h1>
         </div>
         <div style={{ minWidth: "20%" }}>
-          <IconButton onClick={handleMode} className={`themeToggler admin ${admin_theme}`}>
+          <IconButton
+            onClick={handleMode}
+            className={`themeToggler admin ${admin_theme}`}
+          >
             {isDark ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
-          <IconButton onClick={handleMenu} className={`accountIcon admin ${admin_theme}`}>
+          <IconButton
+            onClick={handleMenu}
+            className={`accountIcon admin ${admin_theme}`}
+          >
             <AccountCircleIcon />
           </IconButton>
           <Menu
@@ -47,7 +53,7 @@ export default function AdminBody() {
               <Button
                 variant="text"
                 color="primary"
-                onClick={() => handleLogout}
+                onClick={() => handleLogout()}
               >
                 Logout
               </Button>
@@ -63,22 +69,46 @@ export default function AdminBody() {
           <h3>Links</h3>
           <div className="footer_actions">
             <Grid container gap={1}>
-              <Grid item xs={12} sm={4} md={3} className={`footer_link ${admin_theme}`}>
+              <Grid
+                item
+                xs={12}
+                sm={4}
+                md={3}
+                className={`footer_link ${admin_theme}`}
+              >
                 <Link to="/admin">
                   <p>/</p>
                 </Link>
               </Grid>
-              <Grid item xs={12} sm={4} md={3} className={`footer_link ${admin_theme}`}>
+              <Grid
+                item
+                xs={12}
+                sm={4}
+                md={3}
+                className={`footer_link ${admin_theme}`}
+              >
                 <Link to="/admin/your-movies">
                   <p>/your-movies</p>
                 </Link>
               </Grid>
-              <Grid item xs={12} sm={4} md={3} className={`footer_link ${admin_theme}`}>
+              <Grid
+                item
+                xs={12}
+                sm={4}
+                md={3}
+                className={`footer_link ${admin_theme}`}
+              >
                 <Link to="/admin/your-genres">
                   <p>/your-genres</p>
                 </Link>
               </Grid>
-              <Grid item xs={12} sm={4} md={3} className={`footer_link ${admin_theme}`}>
+              <Grid
+                item
+                xs={12}
+                sm={4}
+                md={3}
+                className={`footer_link ${admin_theme}`}
+              >
                 <Link to="/admin/users-and-reviews">
                   <p>/users-and-reviews</p>
                 </Link>

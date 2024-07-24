@@ -79,6 +79,7 @@ function TotalUserAndReviews() {
       }),
     });
     setOpenBanConfirm(false);
+    setOpenDeleteUserConfirm(false)
     setFetchNew((prev) => !prev);
   };
 

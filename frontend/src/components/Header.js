@@ -21,7 +21,7 @@ export default function Header({ inLink }) {
   const [isDark, setisDark] = useState(false);
   const { toggleTheme } = useContext(ThemeContext);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { logout, user } = useContext(AuthContext);
+  const { isLoggedIn, logout, user } = useContext(AuthContext);
   const [search, setSearch] = useState(false);
   const navigate = useNavigate();
   function handleSearch() {
@@ -97,16 +97,29 @@ export default function Header({ inLink }) {
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
-            <MenuItem onClick={handleClose}>{user}</MenuItem>
-            <MenuItem onClick={handleLogout}>
-              <Button
-                variant="text"
-                color="primary"
-                onClick={() => handleLogout}
-              >
-                Logout
-              </Button>
-            </MenuItem>
+            {isLoggedIn && <MenuItem onClick={handleClose}>{user}</MenuItem>}
+
+            {isLoggedIn ? (
+              <MenuItem onClick={handleLogout}>
+                <Button
+                  variant="text"
+                  color="primary"
+                  onClick={() => handleLogout}
+                >
+                  Logout
+                </Button>
+              </MenuItem>
+            ) : (
+              <MenuItem onClick={() => navigate("/login")}>
+                <Button
+                  variant="text"
+                  color="primary"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </Button>
+              </MenuItem>
+            )}
           </Menu>
           <IconButton className={`themeToggler ${theme}`} onClick={handleMode}>
             {isDark ? <DarkModeIcon /> : <LightModeIcon />}

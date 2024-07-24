@@ -15,14 +15,14 @@ export default function Hero() {
   const [movieIndex, setmovieIndex] = useState(0);
   const { uid, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const baseUrl = "https://moviereview-8vcv.onrender.com/get-movies-all";
+  const url = uid ? `${baseUrl}?user=${uid}` : baseUrl;
   const imageUrl =
     "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch(
-          `https://moviereview-8vcv.onrender.com/get-movies-all?user=${uid}`
-        );
+        const response = await fetch(url);
         const data = await response.json();
         if (data.isBanned) {
           alert("You are banned by the admin");
@@ -37,7 +37,7 @@ export default function Hero() {
       }
     }
     fetchData();
-  }, [logout, uid]);
+  }, [logout, uid, url]);
   function handleIndex(state) {
     if (state === "prev") {
       setmovieIndex(movieIndex - 1);

@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import {
   Stack,
@@ -24,9 +24,11 @@ export default function MovieDetail({ isAdmin }) {
   const [openSaveReview, setOpenSaveReview] = useState(false);
   const [userReview, setUserReview] = useState("");
   const id = useParams();
-  const { uid } = useContext(AuthContext);
+  const { isLoggedIn, uid } = useContext(AuthContext);
   const { theme } = useContext(ThemeContext);
   const { admin_theme } = useContext(AdminThemeContext);
+  const navigate = useNavigate();
+  console.log(isLoggedIn);
   useEffect(() => {
     async function fetchData() {
       try {
@@ -260,38 +262,57 @@ export default function MovieDetail({ isAdmin }) {
               ) : (
                 ""
               )}
-              {!moviesRatedByUser && (
-                <div className={`non_rating ${isAdmin ? admin_theme : theme}`}>
-                  <p>Rate now</p>
-                  <Stack spacing={1} sx={{ margin: "auto" }}>
-                    <Rating
-                      defaultValue={moviesRatedByUser}
-                      precision={0.5}
-                      value={rating}
-                      fontSize="large"
-                      onChange={handleRating}
-                    />
-                  </Stack>
-                  <Button
-                    variant="outlined"
-                    color="inherit"
-                    onClick={addRating}
+              {isLoggedIn ? (
+                <>
+                  {!moviesRatedByUser && (
+                    <div
+                      className={`non_rating ${isAdmin ? admin_theme : theme}`}
+                    >
+                      <p>Rate now</p>
+                      <Stack spacing={1} sx={{ margin: "auto" }}>
+                        <Rating
+                          defaultValue={moviesRatedByUser}
+                          precision={0.5}
+                          value={rating}
+                          fontSize="large"
+                          onChange={handleRating}
+                        />
+                      </Stack>
+                      <Button
+                        variant="outlined"
+                        color="inherit"
+                        onClick={addRating}
+                      >
+                        SAVE
+                      </Button>
+                    </div>
+                  )}
+                  {!moviesReviewedByUser[0] && (
+                    <div className="non_review">
+                      <h4>POST YOUR REVIEW NOW</h4>
+                    </div>
+                  )}{" "}
+                </>
+              ) : (
+                <h2>
+                  Login to rate and review movies.{" "}
+                  <u
+                    style={{
+                      fontSize: "0.5em",
+                      fontStyle: "italic",
+                      whiteSpace: "nowrap",
+                    }}
+                    onClick={() => navigate("/login")}
                   >
-                    SAVE
-                  </Button>
-                </div>
-              )}
-              {!moviesReviewedByUser[0] && (
-                <div className="non_review">
-                  <h4>POST YOUR REVIEW NOW</h4>
-                </div>
+                    Create an account
+                  </u>
+                </h2>
               )}
             </div>
           )}
-
           <div className={`review_section ${isAdmin ? admin_theme : theme}`}>
             <h3>Reviews</h3>
-            {!isAdmin && !moviesReviewedByUser[0] && (
+            {!isAdmin && !moviesReviewedByUser[0] && isLoggedIn && (
               <TextField
                 label="ADD YOUR REVIEW"
                 helperText="POST YOUR REVIEW HERE"

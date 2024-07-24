@@ -1,10 +1,12 @@
 import { FormControl, Button, useMediaQuery, useTheme } from "@mui/material";
 import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import CustomTextField from "./CustomTextFieldForLogin";
 import { AuthContext } from "./functions/AuthContext";
 import { AdminAuthContext } from "./functions/AdminAuthContext";
 export default function Login({ type }) {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { login } = useContext(AuthContext);
   const { adminLogin } = useContext(AdminAuthContext);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -66,6 +68,7 @@ export default function Login({ type }) {
               };
               login({ user });
               resetData();
+              navigate("/")
             }
           });
       } else if (ActiveOption === 2) {
@@ -92,6 +95,7 @@ export default function Login({ type }) {
                 id: data.result._id,
               };
               login({ user });
+              navigate("/")
               resetData();
             } else {
               alert(data.message);

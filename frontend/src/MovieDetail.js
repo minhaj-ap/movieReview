@@ -52,7 +52,6 @@ export default function MovieDetail({ isAdmin }) {
   const [openConfirm, setOpenConfirm] = useState(false);
   const handleRating = (e) => {
     setRating(e.target.value);
-    setOpenSaveRating(false);
   };
   const handleReview = (e) => {
     setNewReview(e.target.value);

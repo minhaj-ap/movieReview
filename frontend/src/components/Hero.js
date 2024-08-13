@@ -65,7 +65,7 @@ export default function Hero() {
       </span>
       <div
         className="hero_content"
-        style={{ fontSize: isMobile ? "1em" : "2em" }}
+        style={{ fontSize: isMobile ? "1em" : "1.5em" }}
       >
         <h1 style={{ color: loading && "black" }}>
           {loading ? <Skeleton variant="text" /> : movies[movieIndex].title}

@@ -556,6 +556,7 @@ div.non_rating.dark span.MuiRating-icon svg.MuiSvgIcon-root {
   padding: 1em;
   display: flex;
   justify-content: space-around;
+  margin: 1em;
 }
 .movie_details_shower.light {
   background-color: #fffaf0;
@@ -614,8 +615,9 @@ div.non_rating.dark span.MuiRating-icon svg.MuiSvgIcon-root {
 }
 .search_page {
   padding: 5em 2em 0;
-  height: 100vh;
+  height: max-content;
   color: white;
+  padding-bottom: 3em;
 }
 .search_page.dark {
   background-color: #0d0d0d;

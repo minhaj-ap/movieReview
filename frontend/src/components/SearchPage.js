@@ -6,6 +6,7 @@ import { ThemeContext } from "../functions/ThemeContext";
 export default function SearchPage() {
   const { key } = useParams();
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true)
   const { theme } = useContext(ThemeContext);
   useEffect(() => {
     const baseUrl = "https://moviereview-8vcv.onrender.com/search";
@@ -15,6 +16,7 @@ export default function SearchPage() {
       .then((data) => {
         console.log(data);
         setData(data);
+        setLoading(false)
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -31,14 +33,15 @@ export default function SearchPage() {
           <p>Search results for :&nbsp;</p>
           <h3>{key}</h3>
         </div>
-        {data.length ? (
-          data.map((e, index) => (
-            <MovieShowcase e={e} isAdmin={false} isSearch key={index} />
-          ))
-        ) : (
-          <div className="no_search_result">
-          <strong>NO MOVIES MATCH YOUR RESULT</strong></div>
-        )}
+        {!loading ?
+          data.length ? (
+            data.map((e, index) => (
+              <MovieShowcase e={e} isAdmin={false} isSearch key={index} />
+            ))
+          ) : (
+            <div className="no_search_result">
+              <strong>NO MOVIES MATCH YOUR RESULT</strong></div>
+          ) : <div className="no_search_result"><h3>Loading....</h3></div>}
       </div>
     </div>
   );

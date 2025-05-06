@@ -77,7 +77,7 @@ export default function MovieModifier(props) {
     async function fetchOptions() {
       try {
         const response = await fetch(
-          "https://moviereview-8vcv.onrender.com/get-all-genres"
+          `${process.env.REACT_APP_SERVER_URL}/get-all-genres`
         );
         const data = await response.json();
         const initialStatus = {};

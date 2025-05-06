@@ -3,17 +3,18 @@ import { ThemeContext } from "./functions/ThemeContext";
 import { AdminThemeContext } from "./functions/AdminThemeContext";
 import { Link } from "react-router-dom";
 import { Button, Rating, useMediaQuery, useTheme, Stack } from "@mui/material";
-export default function MovieShowcase({ e, isAdmin, isSearch }) {
+export default function MovieShowcase({ data, isAdmin, isSearch }) {
   const { admin_theme } = useContext(AdminThemeContext);
   const { theme } = useContext(ThemeContext);
   const size = useTheme();
+  const e = data.movieDetails || data;
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
-  const baseUrl =
-    "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
+  const baseUrl = "https://image.tmdb.org/t/p/w500";
+  console.log(data);
   return (
     <div className={`movie_details_shower ${isAdmin ? admin_theme : theme}`}>
       <div className="movie_details_image">
-        <img src={baseUrl + e.imageLink} alt="" />
+        <img src={baseUrl + e.poster_path} alt="" />
       </div>
       <div className={`movie_details_info ${isAdmin ? admin_theme : theme}`}>
         <h4>
@@ -21,7 +22,7 @@ export default function MovieShowcase({ e, isAdmin, isSearch }) {
         </h4>
         {!(isSearch && isMobile) && (
           <h4>
-            Description:<span>{e.desc}</span>
+            Description:<span>{e.overview}</span>
           </h4>
         )}
         {isSearch && (
@@ -39,7 +40,7 @@ export default function MovieShowcase({ e, isAdmin, isSearch }) {
           <div style={{ display: "grid", placeContent: "stretch" }}>
             {" "}
             <Link
-              to={`/movie/${e._id}`}
+              to={`/movie/${e.id}`}
               style={{ display: "grid", placeContent: "stretch" }}
             >
               <Button variant="outlined">RATE NOW</Button>
@@ -49,27 +50,12 @@ export default function MovieShowcase({ e, isAdmin, isSearch }) {
         {!isSearch && (
           <>
             <h4>
-              No of ratings:<span>{e.NoOfRatings}</span>
+              No of ratings:<span>{data.rating[0]?.NoOfRatings || 0}</span>
             </h4>
             <h4>
-              Current rating<span>{e.currentRating}</span>
+              Current rating:
+              <span>{data.rating[0]?.currentRating || "0.0"}</span>
             </h4>
-            {e.genreDetails && (
-              <ul>
-                Genres:
-                {e.genreDetails.map((e, index) => (
-                  <li key={index}>{e.name}</li>
-                ))}
-              </ul>
-            )}
-            {isAdmin && (
-              <Button
-                variant="outlined"
-                sx={{ fontWeight: "bold" }}
-              >
-                <Link to="/admin/your-movies">EDIT THIS MOVIE</Link>
-              </Button>
-            )}{" "}
           </>
         )}
       </div>

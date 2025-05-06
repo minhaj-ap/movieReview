@@ -9,7 +9,7 @@ export default function ReviewTile({ data, isAdmin }) {
   const deleteReview = async (e) => {
     try {
       const response = await fetch(
-        `https://moviereview-8vcv.onrender.com/delete-review/${e._id}`,
+        `${process.env.REACT_APP_SERVER_URL}/delete-review/${e._id}`,
         {
           method: "DELETE",
           headers: {

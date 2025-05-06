@@ -87,28 +87,6 @@ export default function AdminBody() {
                 md={3}
                 className={`footer_link ${admin_theme}`}
               >
-                <Link to="/admin/your-movies">
-                  <p>/your-movies</p>
-                </Link>
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                sm={4}
-                md={3}
-                className={`footer_link ${admin_theme}`}
-              >
-                <Link to="/admin/your-genres">
-                  <p>/your-genres</p>
-                </Link>
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                sm={4}
-                md={3}
-                className={`footer_link ${admin_theme}`}
-              >
                 <Link to="/admin/users-and-reviews">
                   <p>/users-and-reviews</p>
                 </Link>

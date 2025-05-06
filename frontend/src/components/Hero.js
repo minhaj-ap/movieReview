@@ -15,10 +15,9 @@ export default function Hero() {
   const [movieIndex, setmovieIndex] = useState(0);
   const { uid, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const baseUrl = "https://moviereview-8vcv.onrender.com/get-movies-all";
+  const baseUrl = `${process.env.REACT_APP_SERVER_URL}/get-movies-all`;
+  console.log(baseUrl);
   const url = uid ? `${baseUrl}?user=${uid}` : baseUrl;
-  const imageUrl =
-    "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
   useEffect(() => {
     async function fetchData() {
       try {
@@ -46,7 +45,8 @@ export default function Hero() {
     }
   }
   const redirect = (index) => {
-    const id = movies[index]._id;
+    console.log(movies[index]);
+    const id = movies[index].id;
     navigate(`/movie/${id}`);
   };
   return (
@@ -54,7 +54,9 @@ export default function Hero() {
       className="hero"
       style={{
         backgroundImage: `url(${
-          loading ? " " : imageUrl + movies[movieIndex].imageLink
+          loading
+            ? " "
+            : `https://image.tmdb.org/t/p/original${movies[movieIndex].backdrop_path}`
         })`,
       }}
     >
@@ -78,7 +80,7 @@ export default function Hero() {
               <Skeleton variant="text" height={40} />{" "}
             </>
           ) : (
-            movies[movieIndex].desc
+            movies[movieIndex].overview
           )}
         </p>
         <div className="rate_buttons">

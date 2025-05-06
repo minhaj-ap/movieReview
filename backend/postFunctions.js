@@ -1,6 +1,7 @@
 const { getDb } = require("./db");
 const { ObjectId } = require("mongodb");
 const bcrypt = require("bcrypt");
+const apiKey = process.env.TMDB_API;
 async function addMovieDb(params) {
   try {
     const db = await getDb();
@@ -26,46 +27,36 @@ async function addMovieDb(params) {
     return false;
   }
 }
-async function editMovie({ _id, ...updatedData }) {
-  try {
-    const db = await getDb();
-    const movie = updatedData;
-    console.log("movie", movie);
-    const result = await db.collection("movie_details").findOneAndUpdate(
-      { _id: new ObjectId(_id) },
-      {
-        $set: updatedData,
-      },
-      { returnOriginal: false }
-    );
-    return result;
-  } catch (error) {
-    console.error("Error adding movie to database:", error);
-    return false;
-  }
-}
+
 async function addReview(params) {
   try {
     const db = await getDb();
     const userId = params.userId;
     const review = params.review;
     const movieId = params.movieId;
+    const movieData = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`
+    );
+    const movieRes = await movieData.json();
+    const movieName = movieRes.title;
     if (!userId || !review || !movieId) {
       return false;
     }
     const reviewData = {
       userId: new ObjectId(userId),
       review,
+      movieId,
+      movieName,
       date: new Date(),
     };
     const response = await db.collection("reviews").insertOne(reviewData);
-
     const reviewId = response.insertedId;
     const addingToMovie = await db
-      .collection("movie_details")
+      .collection("movie")
       .updateOne(
-        { _id: new ObjectId(movieId) },
-        { $push: { reviewIds: new ObjectId(reviewId) } }
+        { $and: [{ _id: parseInt(movieId) }, { movieName: movieName }] },
+        { $push: { reviewIds: new ObjectId(reviewId) } },
+        { upsert: true }
       );
     console.log(addingToMovie);
     return addingToMovie;
@@ -77,68 +68,91 @@ async function addReview(params) {
 async function addRating(data) {
   const db = getDb();
   try {
-    const movieId = data.movieId;
-    const userId = data.userId;
+    const movieId = isNaN(data.movieId)
+      ? new ObjectId(data.movieId) // If it's a valid ObjectId string
+      : parseInt(data.movieId);
+    const userId = new ObjectId(data.userId);
     const rating = parseFloat(data.rating);
-    const collection = db.collection("movie_details");
+    const collection = db.collection("movie");
 
-    // Check if the user has already rated the movie
+    // Check if user already rated this movie
     const movie = await collection.findOne({
-      _id: new ObjectId(movieId),
-      "ratings.userId": new ObjectId(userId),
+      _id: parseInt(movieId),
     });
 
+    let finalOutput;
+    const movieData = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`
+    );
+    const movieRes = await movieData.json();
+    console.log(movieRes);
+    const movieName = movieRes.title;
     if (movie) {
-      // User has rated the movie before, update the rating
-      await collection.updateOne(
-        { _id: new ObjectId(movieId), "ratings.userId": new ObjectId(userId) },
-        { $set: { "ratings.$.rating": rating } }
-      );
-
-      // Recalculate the current rating
-      const updatedMovie = await collection.findOne({
-        _id: new ObjectId(movieId),
+      // Update existing rating
+      const existingRating = await collection.findOne({
+        "ratings.userId": userId,
       });
-      const totalRating = updatedMovie.ratings.reduce(
-        (acc, rating) => acc + rating.rating,
-        0
-      );
-      const newCurrentRating = totalRating / updatedMovie.ratings.length;
 
-      await collection.updateOne(
-        { _id: new ObjectId(movieId) },
-        { $set: { currentRating: newCurrentRating } }
-      );
+      if (existingRating) {
+        // User exists → Update their rating
+        await collection.updateOne(
+          { _id: movieId, "ratings.userId": userId },
+          { $set: { "ratings.$.rating": rating } }
+        );
+      } else {
+        // User doesn't exist → Add a new rating
+        await collection.updateOne(
+          { _id: movieId },
+          {
+            $push: { ratings: { userId, rating } },
+            $inc: { NoOfRatings: 1 },
+          }
+        );
+      }
     } else {
-      // User has not rated the movie before, add the rating
-      await collection.updateOne(
-        { _id: new ObjectId(movieId) },
+      // Add new rating
+      finalOutput = await collection.updateOne(
+        { _id: movieId }, // Only match by ID
         {
-          $push: { ratings: { userId: new ObjectId(userId), rating: rating } },
+          $push: {
+            ratings: {
+              userId: userId,
+              rating: rating,
+            },
+          },
           $inc: { NoOfRatings: 1 },
-        }
+          // Optionally set movieName if needed
+          $setOnInsert: {
+            movieName: movieName,
+          },
+        },
+        { upsert: true }
       );
+    }
 
-      // Recalculate the current rating
-      const updatedMovie = await collection.findOne({
-        _id: new ObjectId(movieId),
-      });
+    // Recalculate average rating (works for both cases)
+    const updatedMovie = await collection.findOne({
+      _id: movieId,
+    });
+
+    if (updatedMovie?.ratings?.length) {
       const totalRating = updatedMovie.ratings.reduce(
-        (acc, rating) => acc + rating.rating,
+        (acc, curr) => acc + curr.rating,
         0
       );
       const newCurrentRating = totalRating / updatedMovie.ratings.length;
 
-      const finalOutput = await collection.updateOne(
-        { _id: new ObjectId(movieId) },
+      await collection.updateOne(
+        { _id: movieId },
         { $set: { currentRating: newCurrentRating } }
       );
     }
 
     console.log("Rating update successful");
-    return finalOutput;
+    return finalOutput || { acknowledged: true }; // Return success even if just updating
   } catch (error) {
-    return error;
+    console.error("Rating error:", error);
+    throw error; // Better to throw than return the error
   }
 }
 async function manipulateReview(data) {
@@ -148,6 +162,7 @@ async function manipulateReview(data) {
     if (!id) {
       return false;
     }
+    console.log(data);
     const updateOperation = {};
     const review = data.review;
     updateOperation.$set = { review: review };
@@ -175,7 +190,7 @@ async function eliminate(id, type) {
     const response = await db
       .collection(property())
       .deleteOne({ _id: new ObjectId(id.id) });
-    const result = repsonse.insertedId;
+    const result = response.insertedId;
     return result;
   } catch (error) {
     console.log(error);
@@ -252,7 +267,7 @@ async function loginAdmin(props) {
 async function unBanUser(id) {
   try {
     console.log(id);
-    const db = await getDb()
+    const db = await getDb();
     const result = await db
       .collection("users")
       .findOneAndUpdate(
@@ -269,7 +284,6 @@ async function unBanUser(id) {
 }
 module.exports = {
   addMovieDb,
-  editMovie,
   addReview,
   addRating,
   manipulateReview,

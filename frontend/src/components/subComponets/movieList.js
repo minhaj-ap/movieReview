@@ -11,8 +11,7 @@ export default function MovieList({ props }) {
       setLoading(false);
     }
   }, [props]);
-  const baseUrl =
-    "https://firebasestorage.googleapis.com/v0/b/entri-projects.appspot.com/o/";
+  const baseUrl = "https://image.tmdb.org/t/p/w500";
 
   const { theme } = useContext(ThemeContext);
   const showMovie = (e) => {
@@ -34,13 +33,13 @@ export default function MovieList({ props }) {
             <Skeleton sx={{ backgroundColor: "grey.900" }} />
           </div>
         ) : (
-          props.movieDetails &&
-          props.movieDetails.map((e) => (
-            <div className={`${theme} list_item`} key={e.id}>
+          props.result.results &&
+          props.result.results.map((e, index) => (
+            <div className={`${theme} list_item`} key={index}>
               <div className={`${theme} list_content`}>
-                <img src={baseUrl + e.imageLink} alt={e.title} />
+                <img src={baseUrl + e.poster_path} alt={e.title} />
                 <h3>{e.title}</h3>
-                <h6>{e.desc}</h6>
+                <h6>{e.overview}</h6>
               </div>
               <div className="list_functions">
                 <Stack spacing={1}>

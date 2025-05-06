@@ -44,7 +44,7 @@ export default function Login({ type }) {
           email: email,
           password: pass,
         };
-        await fetch("https://moviereview-8vcv.onrender.com/signup", {
+        await fetch(`${process.env.REACT_APP_SERVER_URL}/signup`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -68,12 +68,12 @@ export default function Login({ type }) {
               };
               login({ user });
               resetData();
-              navigate("/")
+              navigate("/");
             }
           });
       } else if (ActiveOption === 2) {
         const data = { email: email, password: pass };
-        await fetch("https://moviereview-8vcv.onrender.com/login", {
+        await fetch(`${process.env.REACT_APP_SERVER_URL}/login`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -95,7 +95,7 @@ export default function Login({ type }) {
                 id: data.result._id,
               };
               login({ user });
-              navigate("/")
+              navigate("/");
               resetData();
             } else {
               alert(data.message);
@@ -111,7 +111,7 @@ export default function Login({ type }) {
       }
     } else if (type === "admin") {
       const data = { password: pass };
-      await fetch("https://moviereview-8vcv.onrender.com/admin-login", {
+      await fetch(`${process.env.REACT_APP_SERVER_URL}/admin-login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

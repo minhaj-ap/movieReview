@@ -30,7 +30,7 @@ function TotalUserAndReviews() {
     async function fetchData() {
       try {
         const response = await fetch(
-          "https://moviereview-8vcv.onrender.com/get-users-and-reviews"
+          `${process.env.REACT_APP_SERVER_URL}/get-users-and-reviews`
         );
         const data = await response.json();
         console.log(data);
@@ -47,7 +47,7 @@ function TotalUserAndReviews() {
   const deleteReview = async () => {
     try {
       const response = await fetch(
-        `https://moviereview-8vcv.onrender.com/delete-review/${selectedReview._id}`,
+        `${process.env.REACT_APP_SERVER_URL}/delete-review/${selectedReview._id}`,
         {
           method: "DELETE",
           headers: {
@@ -66,7 +66,7 @@ function TotalUserAndReviews() {
 
   const banUser = async (type) => {
     const user = selectedUser;
-    await fetch("https://moviereview-8vcv.onrender.com/ban-user", {
+    await fetch(`${process.env.REACT_APP_SERVER_URL}/ban-user`, {
       method: "DELETE",
       headers: {
         "Content-type": "application/json",
@@ -79,12 +79,12 @@ function TotalUserAndReviews() {
       }),
     });
     setOpenBanConfirm(false);
-    setOpenDeleteUserConfirm(false)
+    setOpenDeleteUserConfirm(false);
     setFetchNew((prev) => !prev);
   };
 
   const unBanUser = async (e) => {
-    await fetch("https://moviereview-8vcv.onrender.com/unban-user", {
+    await fetch(`${process.env.REACT_APP_SERVER_URL}/unban-user`, {
       method: "POST",
       headers: {
         "Content-type": "application/json",
@@ -113,7 +113,7 @@ function TotalUserAndReviews() {
       }
     }
   };
-
+  console.log(data);
   return (
     <div className="admin genre_drop">
       <h1 style={{ padding: "2em 1em", textAlign: "center", color: "white" }}>
@@ -193,7 +193,7 @@ function TotalUserAndReviews() {
                             review.movieDetails.length > 0 &&
                             review.movieDetails.map((movie, movieIndex) => (
                               <Typography key={movieIndex}>
-                                Movie: {movie.title}
+                                Movie Name: {movie.movieName}
                               </Typography>
                             ))}
                         </div>

@@ -133,31 +133,28 @@ export default function MovieDetail({ isAdmin }) {
   };
   const addReview = async () => {
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_SERVER_URL}/add-review/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: uid,
-            movieId: id.id,
-            movieName: id.title,
-            review: userReview,
-          }),
-        }
-      );
-      const data = await response.json();
+      await fetch(`${process.env.REACT_APP_SERVER_URL}/add-review/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: uid,
+          movieId: id.id,
+          movieName: id.title,
+          review: userReview,
+        }),
+      });
       setMoviesReviewedByUser([{ review: userReview }]);
       setUserReview("");
     } catch (error) {
       console.log(error);
+      alert("An error occured");
     }
   };
   const deleteReview = async (e) => {
     try {
-      const response = await fetch(
+      await fetch(
         `${process.env.REACT_APP_SERVER_URL}/delete-review/${moviesReviewedByUser[0]._id}`,
         {
           method: "DELETE",

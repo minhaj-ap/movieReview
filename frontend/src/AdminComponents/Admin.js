@@ -2,7 +2,6 @@ import Grid from "@mui/material/Grid";
 import { useEffect, useState, useContext } from "react";
 import { AdminThemeContext } from "../functions/AdminThemeContext";
 export default function AdminHome() {
-  const [data, setData] = useState([]);
   const [noOfReviews, setNoOfReviews] = useState();
   const [noOfUsers, setNoOfUsers] = useState();
   const [mostRatedMovie, setmostRatedMovie] = useState();

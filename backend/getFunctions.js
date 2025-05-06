@@ -2,7 +2,6 @@ const { getDb } = require("./db");
 const { ObjectId } = require("mongodb");
 const nodeCache = require("node-cache");
 const apiKey = process.env.TMDB_API;
-const bcrypt = require("bcrypt");
 const cache = new nodeCache({ stdTTL: 0, checkperiod: 60 });
 async function searchDb(params, page = 1) {
   try {
@@ -48,42 +47,6 @@ async function searchDb(params, page = 1) {
     throw error;
   }
 }
-
-async function getMovieDb(params) {
-  try {
-    console.log(params);
-    const { query } = params;
-    const db = getDb();
-    const result = await db
-      .collection("movie_details")
-      .find({ genre_ids: parseInt(query) })
-      .toArray();
-    let cacheExpiry = 3 * 24 * 60 * 60;
-    const cachedResults = cache.get(`movie${query}`);
-    if (!cachedResults && result) {
-      cache.set(`movie${query}`, result, cacheExpiry);
-    }
-    return cachedResults || result;
-  } catch (error) {
-    console.error("Error searching database:", error);
-    throw error;
-  }
-}
-async function myReviewsDb(params) {
-  try {
-    console.log(params);
-    const db = await getDb();
-    const id = params;
-    const result = await db
-      .collection("reviews")
-      .find({ user: parseInt(id) })
-      .toArray();
-    return result;
-  } catch (error) {
-    console.error("Error searching database:", error);
-    throw error;
-  }
-}
 async function getAllMovie() {
   try {
     const response = await fetch(
@@ -92,15 +55,6 @@ async function getAllMovie() {
     const data = await response.json();
     console.log(data.results);
     return data.results;
-  } catch (error) {
-    return error;
-  }
-}
-async function getAllGenres() {
-  try {
-    const db = await getDb();
-    const result = db.collection("genres").find({}).toArray();
-    return result;
   } catch (error) {
     return error;
   }
@@ -135,59 +89,6 @@ async function getStat() {
       },
     ];
     return data;
-  } catch (error) {
-    return error;
-  }
-}
-async function getFullGenresWIthMovie() {
-  try {
-    const db = await getDb();
-    const result = await db
-      .collection("genres")
-      .aggregate([
-        {
-          $project: {
-            name: 1,
-            id: 1,
-            movieIds: { $ifNull: ["$movieIds", []] },
-          },
-        },
-        { $unwind: { path: "$movieIds", preserveNullAndEmptyArrays: true } },
-        {
-          $lookup: {
-            from: "movie_details",
-            localField: "movieIds",
-            foreignField: "_id",
-            as: "movieDetails",
-          },
-        },
-        {
-          $group: {
-            _id: "$_id",
-            id: { $first: "$id" },
-            name: { $first: "$name" },
-            movieDetails: {
-              $push: {
-                $cond: {
-                  if: { $eq: ["$movieDetails", []] },
-                  then: null,
-                  else: {
-                    id: "$movieIds",
-                    title: { $arrayElemAt: ["$movieDetails.title", 0] },
-                    desc: { $arrayElemAt: ["$movieDetails.desc", 0] },
-                    imageLink: { $arrayElemAt: ["$movieDetails.imageLink", 0] },
-                  },
-                },
-              },
-            },
-          },
-        },
-        {
-          $sort: { id: 1 },
-        },
-      ])
-      .toArray();
-    return result;
   } catch (error) {
     return error;
   }
@@ -346,24 +247,6 @@ async function getUsersAndReviews() {
     return error;
   }
 }
-async function getBannedUsers() {
-  try {
-    const db = getDb();
-    const result = await db
-      .collection("users")
-      .aggregate([
-        {
-          $match: {
-            isBanned: true,
-          },
-        },
-      ])
-      .toArray();
-    return result;
-  } catch (error) {
-    return error;
-  }
-}
 async function isBanned(id) {
   const db = await getDb();
   try {
@@ -384,15 +267,10 @@ async function isBanned(id) {
 }
 module.exports = {
   searchDb,
-  getMovieDb,
-  myReviewsDb,
   getAllMovie,
-  getAllGenres,
   getStat,
-  getFullGenresWIthMovie,
   getGenresWIthMovie,
   getFullDetailMovieAndReviews,
   getUsersAndReviews,
-  getBannedUsers,
   isBanned,
 };

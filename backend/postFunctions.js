@@ -2,32 +2,6 @@ const { getDb } = require("./db");
 const { ObjectId } = require("mongodb");
 const bcrypt = require("bcrypt");
 const apiKey = process.env.TMDB_API;
-async function addMovieDb(params) {
-  try {
-    const db = await getDb();
-    const movie = {
-      ...params,
-      reviewIds: [],
-      currentRating: 0.0,
-      NoOfRatings: 0,
-    };
-    const result = await db.collection("movie_details").insertOne(movie);
-    const movieId = result.insertedId;
-    console.log("Inserted document:", movieId);
-    const updated = await db
-      .collection("genres")
-      .updateMany(
-        { id: { $in: params.genre_ids } },
-        { $addToSet: { movieIds: movieId } }
-      );
-    console.log("Update result:", updated);
-    return result;
-  } catch (error) {
-    console.error("Error adding movie to database:", error);
-    return false;
-  }
-}
-
 async function addReview(params) {
   try {
     const db = await getDb();
@@ -178,36 +152,7 @@ async function manipulateReview(data) {
     return false;
   }
 }
-async function eliminate(id, type) {
-  try {
-    const db = getDb();
-    const property = () => {
-      if (type === "movie") return "movie_details";
-      else if (type === "review") return "reviews";
-      else return;
-    };
-    console.log(property(), id.id);
-    const response = await db
-      .collection(property())
-      .deleteOne({ _id: new ObjectId(id.id) });
-    const result = response.insertedId;
-    return result;
-  } catch (error) {
-    console.log(error);
-    return false;
-  }
-}
-async function createGenre(props) {
-  try {
-    const db = getDb();
-    const data = { id: props.id, name: props.name, movieIds: [] };
-    const response = await db.collection("genres").insertOne(data);
-    const result = response.insertedId;
-    return result;
-  } catch (error) {
-    return error;
-  }
-}
+
 async function addUser(props) {
   const password = props.password;
   const name = props.name;
@@ -283,12 +228,9 @@ async function unBanUser(id) {
   }
 }
 module.exports = {
-  addMovieDb,
   addReview,
   addRating,
   manipulateReview,
-  eliminate,
-  createGenre,
   addUser,
   loginUser,
   loginAdmin,

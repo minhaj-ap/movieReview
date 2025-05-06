@@ -5,21 +5,16 @@ const bodyParser = require("body-parser");
 const { connectDb } = require("./db");
 const {
   searchDb,
-  myReviewsDb,
   getAllMovie,
   getStat,
-  getFullGenresWIthMovie,
   getGenresWIthMovie,
   getFullDetailMovieAndReviews,
   getUsersAndReviews,
-  getBannedUsers,
   isBanned,
 } = require("./getFunctions");
 const {
   addReview,
   manipulateReview,
-  eliminate,
-  createGenre,
   addUser,
   loginUser,
   loginAdmin,

@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import Header from "./Header";
 import MovieShowcase from "../MovieShowCase";
 import { ThemeContext } from "../functions/ThemeContext";
+import { toast } from "react-toastify";
 export default function SearchPage() {
   const { key } = useParams();
   const [data, setData] = useState([]);
@@ -20,7 +21,7 @@ export default function SearchPage() {
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
-        alert(error.message);
+        toast.error(error.message);
       });
   }, [key]);
 

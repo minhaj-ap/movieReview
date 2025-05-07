@@ -7,139 +7,142 @@ async function deleteReview(id) {
     const deletion = await db
       .collection("reviews")
       .deleteOne({ _id: reviewObjectId });
-    console.log("deletion", deletion);
-    const results = await db
+    await db
       .collection("movie")
       .updateOne(
         { reviewIds: reviewObjectId },
         { $pull: { reviewIds: reviewObjectId } }
       );
-    console.log("results", results);
     return results;
   } catch (error) {
-    console.log("error in transaction", error);
-    return error;
+    console.error("error in transaction", error);
+    throw error;
   }
 }
 async function banUser({ userId, reviewIds, movieIds, type }) {
-  console.log("[1] Starting banUser with details:", {
-    userId,
-    reviewIds,
-    movieIds,
-    type,
-  });
+  let database;
+  let session; // For transactions
 
-  const database = await getDb();
-  console.log("[2] Database connection established");
-
-  // Handle user deletion/ban
-  if (type === "delete") {
-    console.log("[3] Processing user deletion");
-    const userCollection = await database
-      .collection("users")
-      .deleteOne({ _id: new ObjectId(userId) });
-    console.log("[4] User deletion result:", userCollection);
-  } else if (type === "ban") {
-    console.log("[5] Processing user ban");
-    const usersCollection = database.collection("users");
-    await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { isBanned: true } }
-    );
-    console.log("[6] User ban completed");
-  }
-
-  // Delete reviews from reviews collection
-  if (reviewIds && reviewIds.length > 0) {
-    console.log("[7] Processing review deletion with IDs:", reviewIds);
-    const reviewsCollection = database.collection("reviews");
-    const reviewObjectIds = reviewIds.map((id) => new ObjectId(id));
-    console.log("[8] Converted review IDs to ObjectIds:", reviewObjectIds);
-
-    const deleteResult = await reviewsCollection.deleteMany({
-      _id: { $in: reviewObjectIds },
-    });
-    console.log("[9] Reviews deletion result:", deleteResult);
-  } else {
-    console.log("[10] No reviewIds provided or empty array");
-  }
-
-  // Update movie documents
-  if (movieIds && movieIds.length > 0) {
-    console.log("[11] Processing movie updates with IDs:", movieIds);
-    const movieDetailsCollection = database.collection("movie");
-
-
-    const reviewObjectIds = reviewIds
-      ? reviewIds.map((id) => new ObjectId(id))
-      : [];
-    const userObjectId = new ObjectId(userId);
-    console.log("[15] Prepared IDs:", {
-      reviewObjectIds,
-      userObjectId,
-    });
-
-    // First pull the review IDs and ratings
-    console.log("[16] Attempting to pull reviews and ratings from movies");
-    const pullResult = await movieDetailsCollection.updateMany(
-      { _id: { $in: movieIds } },
-      {
-        $pull: {
-          reviewIds: { $in: reviewObjectIds },
-          ratings: { userId: userObjectId },
-        },
-      }
-    );
-    console.log("[17] Pull operation result:", pullResult);
-
-    // Then recalculate ratings for affected movies
-    console.log("[18] Finding affected movies for rating recalculation");
-    const affectedMovies = await movieDetailsCollection
-      .find({
-        _id: { $in: movieIds },
-      })
-      .toArray();
-
-    console.log("[19] Found affected movies:", affectedMovies.length);
-
-    for (const [index, movie] of affectedMovies.entries()) {
-      console.log(
-        `[20] Processing movie ${index + 1}/${affectedMovies.length}`,
-        {
-          movieId: movie._id,
-          currentRatings: movie.ratings ? movie.ratings.length : 0,
-          currentReviewIds: movie.reviewIds ? movie.reviewIds.length : 0,
-        }
-      );
-
-      const newRatingCount = movie.ratings ? movie.ratings.length : 0;
-      const newAverage =
-        movie.ratings && movie.ratings.length > 0
-          ? movie.ratings.reduce((sum, r) => sum + r.rating, 0) /
-            movie.ratings.length
-          : 0;
-
-      console.log(`[21] Movie ${movie._id} new values:`, {
-        newRatingCount,
-        newAverage,
-      });
-
-      const updateResult = await movieDetailsCollection.updateOne(
-        { _id: movie._id },
-        {
-          $set: {
-            currentRating: newAverage,
-            NoOfRatings: newRatingCount,
-          },
-        }
-      );
-      console.log(`[22] Update result for movie ${movie._id}:`, updateResult);
+  try {
+    // Validate inputs
+    if (!userId) throw new Error("User ID is required");
+    if (type !== "delete" && type !== "ban") {
+      throw new Error('Type must be either "delete" or "ban"');
     }
-  } else {
-    console.log("[23] No movieIds provided or empty array");
-  }
 
-  console.log("[24] banUser function completed");
+    // Convert IDs upfront to fail fast if invalid
+    const userObjectId = new ObjectId(userId);
+    const reviewObjectIds = reviewIds?.map((id) => new ObjectId(id)) || [];
+    const movieObjectIds = movieIds?.map((id) => new ObjectId(id)) || [];
+
+    database = await getDb();
+    session = database.startSession();
+
+    await session.withTransaction(async () => {
+      // Handle user deletion/ban
+      const usersCollection = database.collection("users");
+
+      if (type === "delete") {
+        const deleteResult = await usersCollection.deleteOne(
+          { _id: userObjectId },
+          { session }
+        );
+
+        if (deleteResult.deletedCount === 0) {
+          throw new Error("User not found");
+        }
+      } else {
+        const updateResult = await usersCollection.updateOne(
+          { _id: userObjectId },
+          { $set: { isBanned: true } },
+          { session }
+        );
+
+        if (updateResult.matchedCount === 0) {
+          throw new Error("User not found");
+        }
+      }
+
+      // Delete reviews if provided
+      if (reviewObjectIds.length > 0) {
+        const reviewsCollection = database.collection("reviews");
+        const deleteResult = await reviewsCollection.deleteMany(
+          { _id: { $in: reviewObjectIds } },
+          { session }
+        );
+      }
+
+      // Update movies if provided
+      if (movieObjectIds.length > 0) {
+        const movieDetailsCollection = database.collection("movie");
+
+        // First pull the reviews and ratings
+        const pullResult = await movieDetailsCollection.updateMany(
+          { _id: { $in: movieObjectIds } },
+          {
+            $pull: {
+              reviewIds: { $in: reviewObjectIds },
+              ratings: { userId: userObjectId },
+            },
+          },
+          { session }
+        );
+
+        // Then recalculate ratings for affected movies
+        const affectedMovies = await movieDetailsCollection
+          .find({ _id: { $in: movieObjectIds } }, { session })
+          .toArray();
+
+        const updateOps = affectedMovies.map((movie) => {
+          const newRatingCount = movie.ratings?.length || 0;
+          const newAverage =
+            movie.ratings?.length > 0
+              ? movie.ratings.reduce((sum, r) => sum + r.rating, 0) /
+                movie.ratings.length
+              : 0;
+
+          return {
+            updateOne: {
+              filter: { _id: movie._id },
+              update: {
+                $set: {
+                  currentRating: newAverage,
+                  NoOfRatings: newRatingCount,
+                },
+              },
+            },
+          };
+        });
+
+        if (updateOps.length > 0) {
+          await movieDetailsCollection.bulkWrite(updateOps, { session });
+        }
+      }
+    });
+  } catch (error) {
+    // Log the error with context
+    console.error("Ban user operation failed:", {
+      error: error.message,
+      userId,
+      type,
+      reviewIds,
+      movieIds,
+      stack: error.stack,
+    });
+
+    // Differentiate between expected and unexpected errors
+    if (error instanceof MongoError) {
+      throw new Error("Database operation failed");
+    } else if (error.message.includes("not found")) {
+      throw error; // Re-throw validation errors
+    } else {
+      throw new Error("Failed to process ban request");
+    }
+  } finally {
+    if (session) {
+      await session.endSession();
+    }
+  }
 }
 module.exports = {
   deleteReview,

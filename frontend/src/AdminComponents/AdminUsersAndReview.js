@@ -12,6 +12,7 @@ import BlockIcon from "@mui/icons-material/Block";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import ConfirmDialog from "../ConfirmBox";
+import { toast } from "react-toastify";
 function TotalUserAndReviews() {
   const [expanded, setExpanded] = useState(false);
   const [data, setData] = useState([]);
@@ -33,12 +34,15 @@ function TotalUserAndReviews() {
           `${process.env.REACT_APP_SERVER_URL}/get-users-and-reviews`
         );
         const data = await response.json();
+        if (!response.ok) {
+          throw new Error("Failed to get reviews");
+        }
         console.log(data);
         setData(data);
         setExpanded(false);
       } catch (error) {
         console.error(error);
-        alert(error.message);
+        toast.error(error.message);
       }
     }
     fetchData();
@@ -55,47 +59,68 @@ function TotalUserAndReviews() {
           },
         }
       );
-      console.log(response);
+      if (!response.ok) {
+        throw new Error("Failed to delete Review");
+      }
       setOpenDeleteReviewConfirm(false);
       setFetchNew((prev) => !prev);
     } catch (error) {
       console.log(error);
-      alert("An unexpected error occurred");
+      alert(error?.message || error);
     }
   };
 
   const banUser = async (type) => {
-    const user = selectedUser;
-    await fetch(`${process.env.REACT_APP_SERVER_URL}/ban-user`, {
-      method: "DELETE",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user._id,
-        reviewIds: giveData({ type: "review", data: user }),
-        movieIds: giveData({ type: "movie", data: user }),
-        type,
-      }),
-    });
-    setOpenBanConfirm(false);
-    setOpenDeleteUserConfirm(false);
-    setFetchNew((prev) => !prev);
+    try {
+      const user = selectedUser;
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}/ban-user`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user._id,
+            reviewIds: giveData({ type: "review", data: user }),
+            movieIds: giveData({ type: "movie", data: user }),
+            type,
+          }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to ban user");
+      }
+      setOpenBanConfirm(false);
+      setOpenDeleteUserConfirm(false);
+      setFetchNew((prev) => !prev);
+    } catch (error) {
+      alert(error?.message || error);
+    }
   };
 
   const unBanUser = async (e) => {
-    await fetch(`${process.env.REACT_APP_SERVER_URL}/unban-user`, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: e._id,
-      }),
-    });
-    setFetchNew((prev) => !prev);
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}/unban-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: e._id,
+          }),
+        }
+      );
+      setFetchNew((prev) => !prev);
+      if (!response.ok) {
+        throw new Error("Failed to unban user");
+      }
+    } catch (error) {
+      alert(error?.message || error);
+    }
   };
-
   const giveData = ({ type, data }) => {
     if (type === "review") {
       if (data.userReviews[0]?.movieDetails[0]) {
@@ -113,7 +138,6 @@ function TotalUserAndReviews() {
       }
     }
   };
-  console.log(data);
   return (
     <div className="admin genre_drop">
       <h1 style={{ padding: "2em 1em", textAlign: "center", color: "white" }}>

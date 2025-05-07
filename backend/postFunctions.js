@@ -14,7 +14,7 @@ async function addReview(params) {
     const movieRes = await movieData.json();
     const movieName = movieRes.title;
     if (!userId || !review || !movieId) {
-      return false;
+      throw new Error("no enough parameters");
     }
     const reviewData = {
       userId: new ObjectId(userId),
@@ -25,18 +25,17 @@ async function addReview(params) {
     };
     const response = await db.collection("reviews").insertOne(reviewData);
     const reviewId = response.insertedId;
-    const addingToMovie = await db
+    await db
       .collection("movie")
       .updateOne(
         { $and: [{ _id: parseInt(movieId) }, { movieName: movieName }] },
         { $push: { reviewIds: new ObjectId(reviewId) } },
         { upsert: true }
       );
-    console.log(addingToMovie);
     return addingToMovie;
   } catch (error) {
-    console.log(error);
-    return false;
+    console.error(error);
+    throw error;
   }
 }
 async function addRating(data) {
@@ -59,7 +58,6 @@ async function addRating(data) {
       `https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`
     );
     const movieRes = await movieData.json();
-    console.log(movieRes);
     const movieName = movieRes.title;
     if (movie) {
       // Update existing rating
@@ -121,8 +119,6 @@ async function addRating(data) {
         { $set: { currentRating: newCurrentRating } }
       );
     }
-
-    console.log("Rating update successful");
     return finalOutput || { acknowledged: true }; // Return success even if just updating
   } catch (error) {
     console.error("Rating error:", error);
@@ -134,9 +130,8 @@ async function manipulateReview(data) {
   try {
     const id = data.id;
     if (!id) {
-      return false;
+      throw new Error("No review Id");
     }
-    console.log(data);
     const updateOperation = {};
     const review = data.review;
     updateOperation.$set = { review: review };
@@ -149,7 +144,8 @@ async function manipulateReview(data) {
     const result = response.insertedId;
     return result;
   } catch (error) {
-    return false;
+    console.error(error);
+    throw error;
   }
 }
 
@@ -174,7 +170,8 @@ async function addUser(props) {
       return result;
     }
   } catch (error) {
-    return error;
+    console.error(error);
+    throw error;
   }
 }
 async function loginUser(props) {
@@ -189,14 +186,14 @@ async function loginUser(props) {
     if (user.isBanned) {
       return "You are banned by the administrator";
     }
-    console.log(user.isBanned);
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return false;
     }
     return user;
   } catch (error) {
-    return error;
+    console.error(error);
+    throw error;
   }
 }
 async function loginAdmin(props) {
@@ -206,12 +203,12 @@ async function loginAdmin(props) {
     const result = await db.collection("admin").findOne({ pass: pass });
     return result;
   } catch (error) {
-    return error;
+    console.error(error);
+    throw error;
   }
 }
 async function unBanUser(id) {
   try {
-    console.log(id);
     const db = await getDb();
     const result = await db
       .collection("users")
@@ -224,7 +221,8 @@ async function unBanUser(id) {
       .toArray();
     return result;
   } catch (error) {
-    return error;
+    console.error(error);
+    throw error;
   }
 }
 module.exports = {

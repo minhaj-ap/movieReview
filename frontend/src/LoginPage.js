@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import CustomTextField from "./CustomTextFieldForLogin";
 import { AuthContext } from "./functions/AuthContext";
 import { AdminAuthContext } from "./functions/AdminAuthContext";
+import { toast } from "react-toastify";
 export default function Login({ type }) {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -51,10 +52,10 @@ export default function Login({ type }) {
           },
           body: JSON.stringify(data),
         })
-          .then((response) => {
-            return response.json().then((data) => {
+          .then(async (response) => {
+            return await response.json().then(async (data) => {
               if (!response.ok) {
-                alert(data.message);
+                toast.error(data.message);
                 resetData();
               }
               return data;
@@ -83,7 +84,7 @@ export default function Login({ type }) {
           .then(async (response) => {
             const data = await response.json();
             if (data.message === " You are banned by the administrator") {
-              alert(data.message);
+              toast.warning(data.message);
               return false;
             }
             return data;
@@ -98,7 +99,7 @@ export default function Login({ type }) {
               navigate("/");
               resetData();
             } else {
-              alert(data.message);
+              toast.error(data.message);
               resetData();
             }
           })
@@ -118,8 +119,8 @@ export default function Login({ type }) {
         },
         body: JSON.stringify(data),
       })
-        .then((response) => {
-          return response.json().then((data) => {
+        .then(async (response) => {
+          return response.json().then(async (data) => {
             if (!response.ok) {
               alert("Invalid Credentials");
               resetData();

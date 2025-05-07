@@ -21,7 +21,7 @@ const {
   addRating,
   unBanUser,
 } = require("./postFunctions");
-const {  deleteReview, banUser } = require("./deleteFunctions");
+const { deleteReview, banUser } = require("./deleteFunctions");
 require("dotenv").config();
 const app = express();
 const PORT = 3001;
@@ -30,8 +30,13 @@ app.use(cors({}));
 app.use(bodyParser.json());
 app.get("/search", async (req, res) => {
   try {
+    if (!req.query) {
+      return res.status(400).json({
+        error: "Missing required parameter: query",
+      });
+    }
     const searchResult = await searchDb(req.query);
-    res.json(searchResult);
+    res.status(200).json(searchResult);
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({
@@ -42,24 +47,23 @@ app.get("/search", async (req, res) => {
 });
 
 app.get("/get-movies-all", async (req, res) => {
-  if (req.query.user) {
-    const result = await isBanned(req.query.user);
-    if (result) return res.status(403).json({ isBanned: true });
-  }
   try {
+    if (req.query.user) {
+      const result = await isBanned(req.query.user);
+      if (result) return res.status(403).json({ isBanned: true });
+    }
     const movieResult = await getAllMovie();
     res.status(200).json(movieResult);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).send({
       message: "An error occurred while fetching Movies",
-      error: error,
+      error: error?.message || error,
     });
   }
 });
 app.post("/add-review", async (req, res) => {
   try {
-    console.log(req.body);
     await addReview(req.body);
     res
       .status(200)
@@ -68,7 +72,7 @@ app.post("/add-review", async (req, res) => {
     console.error("Error:", error);
     res.status(500).send({
       message: "An error occurred while adding reviews to the database",
-      error: error,
+      error: error?.message || error,
     });
   }
 });
@@ -78,25 +82,20 @@ app.post("/edit-review/:id", async (req, res) => {
       id: req.params.id,
       review: req.body.review,
     };
-    console.log(requestData);
-    const response = await manipulateReview((data = requestData));
-    console.log(response);
+    await manipulateReview((data = requestData));
     res
       .status(200)
       .send({ message: "Movie added successfully", data: req.body });
   } catch (error) {
-    console.error("Error:", error);
     res.status(500).send({
       message: "An error occurred while manipulating the review",
-      error: error,
+      error: error?.message || error,
     });
   }
 });
 app.post("/add-rating", async (req, res) => {
   try {
-    console.log("recieved: ", req.body);
-    const result = await addRating(req.body);
-    console.log(result);
+    await addRating(req.body);
     res
       .status(200)
       .send({ message: "Rating added successfully", data: result.insertedId });
@@ -104,7 +103,7 @@ app.post("/add-rating", async (req, res) => {
     console.error("Error:", error);
     res.status(500).send({
       message: "An error occurred while adding ratings to the database",
-      error: error,
+      error: error?.message || error,
     });
   }
 });
@@ -116,7 +115,7 @@ app.get("/stats", async (req, res) => {
     console.error("Error:", error);
     res.status(500).send({
       message: "An error occurred while fetching stats from server",
-      error: error,
+      error: error?.message || error,
     });
   }
 });
@@ -130,7 +129,7 @@ app.get("/genres-with-full-movie", async (req, res) => {
     res.status(500).send({
       message:
         "An error occurred while fetching genres with movies from server",
-      error: error,
+      error: error?.message || error,
     });
   }
 });
@@ -149,15 +148,14 @@ app.post("/signup", async (req, res) => {
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({
-      message: "An error occurred while adding user to the database",
-      error: error,
+      message: "An error occurred while signing in",
+      error: error?.message || error,
     });
   }
 });
 app.post("/login", async (req, res) => {
   try {
     const result = await loginUser(req.body);
-    console.log(result);
     if (result == "You are banned by the administrator") {
       res.status(403).json({ message: result, ok: false });
     } else if (result) {
@@ -169,7 +167,7 @@ app.post("/login", async (req, res) => {
     console.error("Error:", error);
     res.status(500).send({
       message: "An error occurred while logging in",
-      error: error,
+      error: error?.message || error,
     });
   }
 });
@@ -181,24 +179,25 @@ app.post("/admin-login", async (req, res) => {
     console.error("Error:", error);
     res.status(500).send({
       message: "An error occurred while logging.",
-      error: error,
+      error: error?.message || error,
     });
   }
 });
 app.delete("/delete-review/:id", async (req, res) => {
   const id = req.params.id;
-  console.log(id);
   try {
     const result = await deleteReview(id);
-    console.log(" deletion result", result);
     if (result.modifiedCount === 1) {
       res.status(200).json({ message: "Reviwew deleted successfully" });
     } else {
       res.status(404).json({ message: "Movie not found" });
     }
   } catch (error) {
-    res.status(500).json({ error: error });
-    console.log("error in endpoints", error);
+    console.error("error in deleting review", error);
+    res.status(500).json({
+      message: "Failed to delete review",
+      error: error?.message || error,
+    });
   }
 });
 app.get("/movie-details/:id", async (req, res) => {
@@ -207,9 +206,10 @@ app.get("/movie-details/:id", async (req, res) => {
     const result = await getFullDetailMovieAndReviews(id);
     res.status(200).json(result);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "failed to get movie details", error: error });
+    res.status(500).json({
+      message: "failed to get movie details",
+      error: error?.message || error,
+    });
   }
 });
 app.get("/get-users-and-reviews", async (req, res) => {
@@ -220,20 +220,19 @@ app.get("/get-users-and-reviews", async (req, res) => {
     console.error("Error:", error);
     res.status(500).send({
       message: "An error occurred while fetching users and reviews",
-      error: error,
+      error: error?.message || error,
     });
   }
 });
 app.delete("/ban-user", async (req, res) => {
   try {
-    console.log(req.body);
     const result = await banUser(req.body);
     res.status(200).json(result);
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({
       message: "An error occurred while fetching users and reviews",
-      error: error,
+      error: error?.message || error,
     });
   }
 });
@@ -245,7 +244,7 @@ app.post("/unban-user", async (req, res) => {
     console.error("Error:", error);
     res.status(500).send({
       message: "An error occurred while fetching users and reviews",
-      error: error,
+      error: error?.message || error,
     });
   }
 });

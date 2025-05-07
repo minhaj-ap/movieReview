@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import MovieList from "./subComponets/movieList";
 import { ThemeContext } from "../functions/ThemeContext";
+import { toast } from "react-toastify";
 export default function List() {
   const { theme } = useContext(ThemeContext);
   const [movies, setMovies] = useState([]);
@@ -11,10 +12,13 @@ export default function List() {
           `${process.env.REACT_APP_SERVER_URL}/genres-with-full-movie`
         );
         const data = await response.json();
+        if (!response.ok) {
+          throw new Error("Failed to fetch movies");
+        }
         setMovies(data);
       } catch (error) {
         console.error(error);
-        alert(error.message);
+        toast.error(error.message);
       }
     }
     fetchData();

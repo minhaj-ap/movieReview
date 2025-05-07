@@ -19,7 +19,10 @@ export default function AdminHome() {
           setleastRatedMovie(data[0].leastRatedMovie);
           setRecentusers(data[0].recentUsers);
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          alert(err.message);
+          console.error(err);
+        });
     }
     fetchData();
   }, []);

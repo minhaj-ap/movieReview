@@ -17,6 +17,7 @@ import ReviewTile from "./components/reviewTile";
 import ConfirmDialog from "./ConfirmBox";
 import { ThemeContext } from "./functions/ThemeContext";
 import { AdminThemeContext } from "./functions/AdminThemeContext";
+import { toast } from "react-toastify";
 import MovieShowcase from "./MovieShowCase";
 export default function MovieDetail({ isAdmin }) {
   const [movieData, setMovieData] = useState(null);
@@ -41,6 +42,9 @@ export default function MovieDetail({ isAdmin }) {
           `${process.env.REACT_APP_SERVER_URL}/movie-details/${id.id}`
         );
         const data = await response.json();
+        if (!response.ok) {
+          throw new Error("Failed to fetch movie details");
+        }
         setMovieData(data);
 
         // Initialize empty arrays if they don't exist
@@ -76,7 +80,7 @@ export default function MovieDetail({ isAdmin }) {
         }
       } catch (error) {
         console.log(error);
-        alert("An unexpected error occurred");
+        toast.error(error.message);
       }
     }
     fetchData();
@@ -104,13 +108,14 @@ export default function MovieDetail({ isAdmin }) {
           body: JSON.stringify(dataToSent),
         }
       );
-      const data = await response.json();
-      console.log(data);
+      if (!response.ok) {
+        throw new Error("Failed to add rating");
+      }
       setOpenSaveRating(false);
       setMoviesRatedByUser(rating);
     } catch (error) {
       console.log(error);
-      alert("An unexpected error occurred");
+      toast.error(error?.message || error);
     }
   };
   const editReview = async () => {
@@ -127,34 +132,46 @@ export default function MovieDetail({ isAdmin }) {
           }),
         }
       );
-      console.log(response);
+      if (!response.ok) {
+        throw new Error("Failed to edit review");
+      }
       setOpenSaveReview(false);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.message || error);
+    }
   };
   const addReview = async () => {
     try {
-      await fetch(`${process.env.REACT_APP_SERVER_URL}/add-review/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: uid,
-          movieId: id.id,
-          movieName: id.title,
-          review: userReview,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}/add-review/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: uid,
+            movieId: id.id,
+            movieName: id.title,
+            review: userReview,
+          }),
+        }
+      );
+      const data = response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong");
+      }
       setMoviesReviewedByUser([{ review: userReview }]);
       setUserReview("");
     } catch (error) {
       console.log(error);
-      alert("An error occured");
+      toast.error("An error occured");
     }
   };
   const deleteReview = async (e) => {
     try {
-      await fetch(
+      const response = await fetch(
         `${process.env.REACT_APP_SERVER_URL}/delete-review/${moviesReviewedByUser[0]._id}`,
         {
           method: "DELETE",
@@ -163,11 +180,14 @@ export default function MovieDetail({ isAdmin }) {
           },
         }
       );
+      if (!response.ok) {
+        throw new Error("Failed to delete Review");
+      }
       setOpenConfirm(false);
       setMoviesReviewedByUser([]);
     } catch (error) {
       console.log(error);
-      alert("An unexpected error occurred");
+      toast.error(error?.message || error);
     }
   };
   return (

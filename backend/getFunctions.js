@@ -1,19 +1,13 @@
 const { getDb } = require("./db");
 const { ObjectId } = require("mongodb");
-const nodeCache = require("node-cache");
 const apiKey = process.env.TMDB_API;
-const cache = new nodeCache({ stdTTL: 0, checkperiod: 60 });
-async function searchDb(params, page = 1) {
+async function searchDb(params) {
   try {
     const db = await getDb();
     const keyword = params.query;
-    if (!keyword) {
-      return "No keyword provided";
-    }
     const url = new URL("https://api.themoviedb.org/3/search/multi");
     url.searchParams.append("api_key", apiKey);
     url.searchParams.append("query", keyword);
-    url.searchParams.append("page", page);
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -25,7 +19,6 @@ async function searchDb(params, page = 1) {
         .collection("movie")
         .find({ _id: parseInt(id) })
         .toArray();
-      console.log("out ", out);
       return await out;
     }
     const results = await Promise.all(
@@ -38,7 +31,6 @@ async function searchDb(params, page = 1) {
         };
       })
     );
-    console.log("resultsd", results);
     return {
       movieDetails: results,
     };
@@ -53,10 +45,10 @@ async function getAllMovie() {
       `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}`
     );
     const data = await response.json();
-    console.log(data.results);
     return data.results;
   } catch (error) {
-    return error;
+    console.error(error);
+    throw error;
   }
 }
 async function getStat() {
@@ -74,7 +66,6 @@ async function getStat() {
       .sort({ currentRating: 1 })
       .limit(1)
       .toArray();
-    console.log("most rated", leastRatedMovie);
     const numberofReviews = await db.collection("reviews").countDocuments({});
     const numberofUsers = await db.collection("users").countDocuments({});
     const Users = await db.collection("users").find({}).limit(3).toArray();
@@ -90,7 +81,8 @@ async function getStat() {
     ];
     return data;
   } catch (error) {
-    return error;
+    console.error(error);
+    throw error;
   }
 }
 async function getGenresWIthMovie() {
@@ -99,7 +91,6 @@ async function getGenresWIthMovie() {
       `https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}`
     );
     const genresData = await genres.json();
-    console.log(genresData);
     const topGenreIds = genresData.genres
       .slice(0, 5)
       .map((g, index) => ({ id: g.id, name: g.name, index: index }));
@@ -115,7 +106,8 @@ async function getGenresWIthMovie() {
     }
     return movies;
   } catch (error) {
-    return error;
+    console.error(error);
+    throw error;
   }
 }
 async function getFullDetailMovieAndReviews(id) {
@@ -124,7 +116,6 @@ async function getFullDetailMovieAndReviews(id) {
     const movie = await fetch(
       `https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}`
     );
-    console.log(movie);
     const movieDetails = await movie.json();
     const review = await db
       .collection("reviews")
@@ -156,11 +147,10 @@ async function getFullDetailMovieAndReviews(id) {
       review: [namedReview],
       rating,
     };
-    console.log("result:", result);
     return result;
   } catch (error) {
     console.error(error);
-    return error;
+    throw error;
   }
 }
 async function getUsersAndReviews() {
@@ -225,14 +215,11 @@ async function getUsersAndReviews() {
       ])
       .toArray();
     async function fetchReview(userId) {
-      console.log("recieved id:", userId);
       const movie = await db.collection("movie");
       const review = await db.collection("review");
       const userReview = await review.find({ userId: userId }).toArray();
-      console.log("review", userReview);
     }
     const users = await db.collection("users").find().toArray();
-    console.log("users", users);
     function run() {
       Promise.all(
         users.map(async (user) => {
@@ -243,8 +230,8 @@ async function getUsersAndReviews() {
     run();
     return reviewedUsers;
   } catch (error) {
-    console.log(error);
-    return error;
+    console.error(error);
+    throw error;
   }
 }
 async function isBanned(id) {
@@ -258,12 +245,11 @@ async function isBanned(id) {
     if (result) {
       isBanned = result[0].isBanned || false;
     }
-    console.log(result);
-    console.log(isBanned);
     return isBanned;
   } catch (error) {
-    return error;
-  }
+    console.error(error);
+    throw error;
+  } 
 }
 module.exports = {
   searchDb,

@@ -8,6 +8,8 @@ import UserPage from "./pages/User";
 import MovieDetail from "./MovieDetail";
 import SearchPage from "./components/SearchPage";
 import Login from "./LoginPage";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 function App() {
   return (
     <Router>
@@ -23,6 +25,7 @@ function App() {
             <Route path="users-and-reviews" element={<TotalUserAndReviews />} />
           </Route>
         </Routes>
+        <ToastContainer position="bottom-right" />
       </div>
     </Router>
   );

@@ -17,12 +17,14 @@ export default function ReviewTile({ data, isAdmin }) {
           },
         }
       );
-      console.log(response);
+      if (!response.ok) {
+        throw new Error("Failed to delete review");
+      }
       setOpenConfirm(false);
       setDelete(true);
     } catch (error) {
       console.log(error);
-      alert("An unexpected error occurred");
+      alert(error?.message || error);
     }
   };
   return (

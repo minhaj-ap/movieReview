@@ -7,6 +7,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { AuthContext } from "../functions/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 export default function Hero() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -24,7 +25,7 @@ export default function Hero() {
         const response = await fetch(url);
         const data = await response.json();
         if (data.isBanned) {
-          alert("You are banned by the admin");
+          toast.warning("You have been banned or deleted by the admin");
           logout();
         } else if (data[0]) {
           setLoading(false);
@@ -32,7 +33,7 @@ export default function Hero() {
         }
       } catch (err) {
         console.error("Failed to fetch", err);
-        alert("Failed to fetch");
+        toast.error("Failed to fetch");
       }
     }
     fetchData();

@@ -10,7 +10,6 @@ export default function MovieShowcase({ data, isAdmin, isSearch }) {
   const e = data.movieDetails || data;
   const isMobile = useMediaQuery(size.breakpoints.down("sm"));
   const baseUrl = "https://image.tmdb.org/t/p/w500";
-  console.log(data);
   return (
     <div className={`movie_details_shower ${isAdmin ? admin_theme : theme}`}>
       <div className="movie_details_image">

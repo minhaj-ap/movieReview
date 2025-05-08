@@ -96,9 +96,7 @@ app.post("/edit-review/:id", async (req, res) => {
 app.post("/add-rating", async (req, res) => {
   try {
     await addRating(req.body);
-    res
-      .status(200)
-      .send({ message: "Rating added successfully", data: result.insertedId });
+    res.status(200).send({ message: "Rating added successfully" });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({

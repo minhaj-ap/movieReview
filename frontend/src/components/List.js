@@ -26,7 +26,6 @@ export default function List() {
   return (
     <div className={`${theme} list-container`}>
       {movies.map((e, index) => {
-        console.log(e);
         return <MovieList props={e} key={index} />;
       })}
     </div>

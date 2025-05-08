@@ -56,13 +56,19 @@ async function getStat() {
     const db = await getDb();
     const mostRatedMovie = await db
       .collection("movie")
-      .find({}, { projection: { movieName: 1, _id: 0 } })
+      .find(
+        { currentRating: { $gt: 0 } },
+        { projection: { movieName: 1, _id: 0 } }
+      )
       .sort({ currentRating: -1 })
       .limit(1)
       .toArray();
     const leastRatedMovie = await db
       .collection("movie")
-      .find({}, { projection: { movieName: 1, _id: 0 } })
+      .find(
+        { currentRating: { $gt: 0 } },
+        { projection: { movieName: 1, _id: 0 } }
+      )
       .sort({ currentRating: 1 })
       .limit(1)
       .toArray();
@@ -72,8 +78,8 @@ async function getStat() {
     const recentUsers = Users.map((user) => user.name);
     const data = [
       {
-        mostRatedMovie: mostRatedMovie[0].movieName,
-        leastRatedMovie: leastRatedMovie[0].movieName,
+        mostRated: mostRatedMovie[0] ? mostRatedMovie[0].movieName : "",
+        leastRated: leastRatedMovie[0] ? leastRatedMovie[0].movieName : "",
         numberofReviews,
         numberofUsers,
         recentUsers,
@@ -249,7 +255,7 @@ async function isBanned(id) {
   } catch (error) {
     console.error(error);
     throw error;
-  } 
+  }
 }
 module.exports = {
   searchDb,

@@ -17,7 +17,6 @@ export default function Hero() {
   const { uid, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const baseUrl = `${process.env.REACT_APP_SERVER_URL}/get-movies-all`;
-  console.log(baseUrl);
   const url = uid ? `${baseUrl}?user=${uid}` : baseUrl;
   useEffect(() => {
     async function fetchData() {

@@ -1,5 +1,5 @@
-const { getDb } = require("./db");
-const { ObjectId } = require("mongodb");
+const { getDb, getClient } = require("./db");
+const { ObjectId, MongoError } = require("mongodb");
 async function deleteReview(id) {
   const db = getDb();
   const reviewObjectId = new ObjectId(id);
@@ -21,6 +21,7 @@ async function deleteReview(id) {
 }
 async function banUser({ userId, reviewIds, movieIds, type }) {
   let database;
+  let client;
   let session; // For transactions
 
   try {
@@ -36,7 +37,8 @@ async function banUser({ userId, reviewIds, movieIds, type }) {
     const movieObjectIds = movieIds?.map((id) => new ObjectId(id)) || [];
 
     database = await getDb();
-    session = database.startSession();
+    client = await getClient();
+    session = client.startSession();
 
     await session.withTransaction(async () => {
       // Handle user deletion/ban

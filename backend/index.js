@@ -222,7 +222,7 @@ app.get("/get-users-and-reviews", async (req, res) => {
     });
   }
 });
-app.get("/ban-user", async (req, res) => {
+app.delete("/ban-user", async (req, res) => {
   try {
     const result = await banUser(req.body);
     res.status(200).json(result);

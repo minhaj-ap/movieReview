@@ -21,7 +21,7 @@ const {
   addRating,
   unBanUser,
 } = require("./postFunctions");
-const { deleteReview, banUser } = require("./deleteFunctions");
+const { deleteReview, banUser, deleteRating } = require("./deleteFunctions");
 require("dotenv").config();
 const app = express();
 const PORT = 3001;
@@ -222,7 +222,7 @@ app.get("/get-users-and-reviews", async (req, res) => {
     });
   }
 });
-app.delete("/ban-user", async (req, res) => {
+app.get("/ban-user", async (req, res) => {
   try {
     const result = await banUser(req.body);
     res.status(200).json(result);
@@ -242,6 +242,21 @@ app.post("/unban-user", async (req, res) => {
     console.error("Error:", error);
     res.status(500).send({
       message: "An error occurred while fetching users and reviews",
+      error: error?.message || error,
+    });
+  }
+});
+app.delete("/delete-rating", async (req, res) => {
+  try {
+    const movieId = req.body.movieId;
+    const userId = req.body.userId;
+    console.log(movieId, userId);
+    const result = await deleteRating(movieId, userId);
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "An error occurred while deleting rating",
       error: error?.message || error,
     });
   }

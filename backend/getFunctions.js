@@ -174,6 +174,14 @@ async function getUsersAndReviews() {
           },
         },
         {
+          $lookup: {
+            from: "movie",
+            localField: "_id",
+            foreignField: "ratings.userId",
+            as: "userRatings",
+          },
+        },
+        {
           $unwind: {
             path: "$userReviews",
             preserveNullAndEmptyArrays: true,
@@ -205,6 +213,7 @@ async function getUsersAndReviews() {
             userEmail: { $first: "$email" },
             isBanned: { $first: "$isBanned" },
             userReviews: { $push: "$userReviews" },
+            userRatings: { $first: "$userRatings" },
           },
         },
         {
@@ -216,6 +225,17 @@ async function getUsersAndReviews() {
             "userReviews._id": 1,
             "userReviews.movieDetails._id": 1,
             "userReviews.movieDetails.movieName": 1,
+            userRatings: {
+              $map: {
+                input: "$userRatings",
+                as: "movie",
+                in: {
+                  movieName: "$$movie.movieName",
+                  movieId: "$$movie._id",
+                  rating: { $arrayElemAt: ["$$movie.ratings.rating", 0] },
+                },
+              },
+            },
           },
         },
       ])

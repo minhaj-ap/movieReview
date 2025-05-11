@@ -20,8 +20,12 @@ function TotalUserAndReviews() {
   const [openBanConfirm, setOpenBanConfirm] = useState(false);
   const [openDeleteUserConfirm, setOpenDeleteUserConfirm] = useState(false);
   const [openDeleteReviewConfirm, setOpenDeleteReviewConfirm] = useState(false);
+  const [openDeleteRatingConfirm, setOpenDeleteRatingConfirm] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedReview, setSelectedReview] = useState(null);
+  const [selectedRating, setSelectedRating] = useState([
+    { userId: null, movieId: null },
+  ]);
 
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
@@ -63,6 +67,28 @@ function TotalUserAndReviews() {
         throw new Error("Failed to delete Review");
       }
       setOpenDeleteReviewConfirm(false);
+      setFetchNew((prev) => !prev);
+    } catch (error) {
+      console.log(error);
+      alert(error?.message || error);
+    }
+  };
+  const deleteRating = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}/delete-rating`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify(selectedRating),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to delete Review");
+      }
+      setOpenDeleteRatingConfirm(false);
       setFetchNew((prev) => !prev);
     } catch (error) {
       console.log(error);
@@ -129,13 +155,26 @@ function TotalUserAndReviews() {
         return null;
       }
     } else if (type === "movie") {
+      let ids = [];
       if (data.userReviews[0]?.movieDetails[0]) {
-        return data.userReviews.flatMap((review) =>
-          (review.movieDetails || []).map((movie) => movie._id)
-        );
-      } else {
-        return null;
+        ids = [
+          ...new Set([
+            ...ids,
+            ...data.userReviews.flatMap((review) =>
+              (review.movieDetails || []).map((movie) => movie._id)
+            ),
+          ]),
+        ];
       }
+      if (data.userRatings.length > 0) {
+        ids = [
+          ...new Set([
+            ...ids,
+            ...data.userRatings.map((movie) => movie.movieId),
+          ]),
+        ];
+      }
+      return ids;
     }
   };
   return (
@@ -205,43 +244,90 @@ function TotalUserAndReviews() {
                 <Typography>Email: {e.userEmail}</Typography>
               </Box>
               <AccordionDetails>
-                {e.userReviews.length > 0 ? (
-                  e.userReviews.map((review, reviewIndex) => (
-                    <React.Fragment key={reviewIndex}>
-                      <div className="review_info_tile">
-                        <div>
-                          <Typography>
-                            Review: {review.review || "NO DATA"}
-                          </Typography>
-                          {review.movieDetails &&
-                            review.movieDetails.length > 0 &&
-                            review.movieDetails.map((movie, movieIndex) => (
-                              <Typography key={movieIndex}>
-                                Movie Name: {movie.movieName}
-                              </Typography>
-                            ))}
+                {e.userReviews[0].movieDetails.length > 0 ? (
+                  <>
+                    <h3 style={{ fontWeight: "bold" }}>Reviews</h3>
+                    {e.userReviews.map((review, reviewIndex) => (
+                      <React.Fragment key={reviewIndex}>
+                        <div className="review_info_tile">
+                          <div>
+                            <Typography>
+                              Review: {review.review || "NO DATA"}
+                            </Typography>
+                            {review.movieDetails &&
+                              review.movieDetails.length > 0 &&
+                              review.movieDetails.map((movie, movieIndex) => (
+                                <Typography key={movieIndex}>
+                                  Movie Name: {movie.movieName}
+                                </Typography>
+                              ))}
+                          </div>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedReview(review);
+                              setOpenDeleteReviewConfirm(true);
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                          <ConfirmDialog
+                            open={openDeleteReviewConfirm}
+                            handleClose={() =>
+                              setOpenDeleteReviewConfirm(false)
+                            }
+                            handleConfirm={deleteReview}
+                            text="delete this review"
+                          />
                         </div>
-                        <IconButton
-                          onClick={() => {
-                            setSelectedReview(review);
-                            setOpenDeleteReviewConfirm(true);
-                          }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                        <ConfirmDialog
-                          open={openDeleteReviewConfirm}
-                          handleClose={() => setOpenDeleteReviewConfirm(false)}
-                          handleConfirm={deleteReview}
-                          text="delete this review"
-                        />
-                      </div>
-                      <hr />
-                    </React.Fragment>
-                  ))
+                        <hr />
+                      </React.Fragment>
+                    ))}
+                  </>
                 ) : (
                   <div style={{ textAlign: "center" }}>
                     <strong> THE USER HAVE NO REVIEWS</strong>
+                  </div>
+                )}
+
+                {e.userRatings.length > 0 ? (
+                  <>
+                    <h3 style={{ fontWeight: "bold" }}>Ratings</h3>
+                    {e.userRatings.map((rating, index) => (
+                      <React.Fragment key={index}>
+                        <div className="review_info_tile">
+                          <div>
+                            <Typography>
+                              Rating: {rating.rating || "NAN"}
+                            </Typography>
+                            <Typography>
+                              Movie Name: {rating.movieName || "NO DATA"}
+                            </Typography>
+                          </div>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedRating({
+                                userId: e._id,
+                                movieId: rating.movieId,
+                              });
+                              setOpenDeleteRatingConfirm(true);
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </div>
+                        <ConfirmDialog
+                          open={openDeleteRatingConfirm}
+                          handleClose={() => setOpenDeleteRatingConfirm(false)}
+                          handleConfirm={deleteRating}
+                          text="Delete this rating"
+                        />
+                        <hr />
+                      </React.Fragment>
+                    ))}
+                  </>
+                ) : (
+                  <div style={{ textAlign: "center" }}>
+                    <strong> THE USER HASN'T DONE ANY RATINGS</strong>
                   </div>
                 )}
               </AccordionDetails>

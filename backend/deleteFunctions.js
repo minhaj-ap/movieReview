@@ -19,7 +19,54 @@ async function deleteReview(id) {
     throw error;
   }
 }
-async function banUser({ userId, reviewIds, movieIds, type }) {
+async function deleteRating(movieId, userId) {
+  const db = getDb();
+  try {
+    const movie = await db.collection("movie").findOne({ _id: movieId });
+    const updatedRatings = movie.ratings.filter(
+      (r) => !r.userId.equals(new ObjectId(userId))
+    );
+    const result = await db
+      .collection("movie")
+      .updateOne({ _id: movieId }, { $set: { ratings: updatedRatings } });
+    const affectedMovies = await db
+      .collection("movie")
+      .find({ _id: movieId })
+      .toArray();
+    const updateOps = affectedMovies.map((movie) => {
+      const newRatingCount = movie.ratings?.length || 0;
+      const newAverage =
+        movie.ratings?.length > 0
+          ? movie.ratings.reduce((sum, r) => sum + r.rating, 0) /
+            movie.ratings.length
+          : 0;
+      return {
+        updateOne: {
+          filter: { _id: movie._id },
+          update: {
+            $set: {
+              currentRating: parseFloat(newAverage),
+              NoOfRatings: parseFloat(newRatingCount),
+            },
+          },
+        },
+      };
+    });
+    if (updateOps.length > 0) {
+      await db.collection("movie").bulkWrite(updateOps);
+    }
+    return true;
+  } catch (error) {
+    console.error("error in transaction", error);
+    throw error;
+  }
+}
+async function banUser({
+  userId = "681c4d2253d644260cfc6e9f",
+  reviewIds = [],
+  movieIds = [986056, 1241436],
+  type = "delete",
+}) {
   let database;
   let client;
   let session; // For transactions
@@ -84,40 +131,58 @@ async function banUser({ userId, reviewIds, movieIds, type }) {
           {
             $pull: {
               reviewIds: { $in: reviewObjectIds },
-              ratings: { userId: userObjectId },
             },
           },
           { session }
         );
-
-        // Then recalculate ratings for affected movies
-        const affectedMovies = await movieDetailsCollection
-          .find({ _id: { $in: movieObjectIds } }, { session })
-          .toArray();
-
-        const updateOps = affectedMovies.map((movie) => {
-          const newRatingCount = movie.ratings?.length || 0;
-          const newAverage =
-            movie.ratings?.length > 0
-              ? movie.ratings.reduce((sum, r) => sum + r.rating, 0) /
-                movie.ratings.length
-              : 0;
-
-          return {
-            updateOne: {
-              filter: { _id: movie._id },
-              update: {
-                $set: {
-                  currentRating: newAverage,
-                  NoOfRatings: newRatingCount,
+        for (const Id of movieIds) {
+          const currentMovie = await movieDetailsCollection
+            .find({
+              _id: Id,
+            })
+            .toArray();
+          if (!currentMovie.length) continue;
+          const updatedRatings = await currentMovie[0].ratings.filter(
+            (r) => !r.userId.equals(new ObjectId(userId))
+          );
+          await database
+            .collection("movie")
+            .updateOne(
+              { _id: Id },
+              { $set: { ratings: updatedRatings } },
+              { session }
+            );
+          const updatedMovie = await database
+            .collection("movie")
+            .find({ _id: Id })
+            .toArray();
+          const originalMovie = currentMovie[0];
+          const newMovie = originalMovie.ratings.filter(
+            (r) => !r.userId.equals(userObjectId)
+          );
+          const updateOps = currentMovie.map((movie) => {
+            const newRatingCount = newMovie.ratings?.length || 0;
+            const newAverage =
+              newMovie.ratings?.length > 0
+                ? newMovie.ratings.reduce((sum, r) => sum + r.rating, 0) /
+                  newMovie.ratings.length
+                : 0;
+            return {
+              updateOne: {
+                filter: { _id: movie._id },
+                update: {
+                  $set: {
+                    currentRating: newAverage,
+                    NoOfRatings: newRatingCount,
+                  },
                 },
               },
-            },
-          };
-        });
+            };
+          });
 
-        if (updateOps.length > 0) {
-          await movieDetailsCollection.bulkWrite(updateOps, { session });
+          if (updateOps.length > 0) {
+            await movieDetailsCollection.bulkWrite(updateOps, { session });
+          }
         }
       }
     });
@@ -149,4 +214,5 @@ async function banUser({ userId, reviewIds, movieIds, type }) {
 module.exports = {
   deleteReview,
   banUser,
+  deleteRating,
 };

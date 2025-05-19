@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "entri-projects"
+  },
+  "targets": {
+    "entri-projects": {
+      "hosting": {
+        "movie-review-minhaj": [
+          "movie-review-minhaj"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

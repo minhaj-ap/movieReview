@@ -1,0 +1,16 @@
+{
+  "hosting": [
+    {
+      "target": "movie-review-minhaj",
+      "public": "public",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "redirects": [
+        {
+          "source": "/**",
+          "destination": "https://movierview.netlify.app/",
+          "type": 301
+        }
+      ]
+    }
+  ]
+}

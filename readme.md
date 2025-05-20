@@ -59,6 +59,8 @@ Here’s how the data is structured in MongoDB:
 ### 👤 Users
 - Add, update, and delete their own reviews and ratings
 - View movies by genre
+- Search movies based on keyword (powered by regex)
+- Can experince site on both dark and light mode
 
 ### 🛠️ Admin
 - Add/edit/delete movies and genres

@@ -1,98 +1,137 @@
-# Movie Review App 🎬  
+# Movie Review Web App - Version 2 (API-Based)
 
-A full-stack MERN (MongoDB, Express, React, Node.js) application that lets users explore movies, write reviews, and leave ratings. Movies are fetched from the TMDB API. Built as part of an internship project with **Entri App**.  
+## Overview
 
-**Admin features**: Delete reviews/ratings, ban and delete users.  
+This is the second version of the Movie Review Web App. It introduces a major architectural shift from a static local database to dynamic movie data fetched from [The Movie Database (TMDb)](https://www.themoviedb.org/). The app now supports movie searching, and retains features like dark/light mode, user ratings, and reviews.
 
-[![Live Demo](https://img.shields.io/badge/demo-live-green)](https://movierview.netlify.app/)  
+Although the user-facing experience is similar to v1, the underlying system is more scalable and maintains data accuracy using TMDb.
 
----  
+## 🌐 Live Hosting
 
-## Features ✨  
+- **Frontend**: Hosted on [Netlify](https://movierview.netlify.app/)
+- **301 Redirect**: The previous Firebase URL redirects to the new Netlify domain (you’ll find Firebase config files still present in the repo for this reason).
 
-- **User Actions**:  
-  - Browse movies (powered by TMDB API).  
-  - Write reviews and rate movies.  
-  - User authentication (login/signup).  
-- **Admin Panel**:  
-  - Delete reviews/ratings.  
-  - Ban/unban users.   
+## 🔧 Tech Stack
 
----  
+- **Frontend**: React.js
+- **Backend**: Node.js + Express
+- **Database**: MongoDB
+- **Hosting**: Netlify (Frontend), Render (Backend)
 
-## Tech Stack 🛠️  
+## 🧩 Key Features
 
-- **Frontend**: React.js  
-- **Backend**: Express.js, Node.js  
-- **Database**: MongoDB  
-- **API**: [TMDB](https://www.themoviedb.org/) (The Movie Database)  
+- Live movie data fetched via TMDb API
+- User login/signup, movie ratings, and reviews
+- Light/Dark mode toggle
+- Search functionality to find any movie
+- Admin controls to manage users, their reviews, and ratings
+- Banned/deleted users are instantly restricted from CRUD operations (unlike in v1, where a reload was required)
 
----  
+## 📊 Updated Database Schema
 
-## Installation & Setup 🚀  
+### `movies` Collection
 
-### Prerequisites  
-- Node.js (v14+)  
-- MongoDB Atlas URI (for database)  
-- TMDB API key ([Get it here](https://www.themoviedb.org/settings/api))  
+- `_id`: TMDb Movie ID (number)
+- `movieName`: String
+- `NoOfRatings`: Number
+- `currentRating`: Float
+- `ratings`: Array of objects
+  - `userId`: ObjectId
+  - `rating`: Float
+- `reviewIds`: Array of ObjectIds
 
-### Steps  
+**Example:**
 
-1. **Clone the repository**:  
-   ```bash  
-   git clone https://github.com/minhaj-ap/movie-review-app.git  
-   cd movie-review-app  
-   ```  
+```json
+{
+  "_id": 950387,
+  "movieName": "A Minecraft Movie",
+  "NoOfRatings": 1,
+  "currentRating": 5,
+  "ratings": [{ "userId": ObjectId("..."), "rating": 5 }],
+  "reviewIds": [ObjectId("...")]
+}
+```
 
-2. **Backend Setup**:  
-   ```bash  
-   cd backend  
-   npm install  
-   ```  
-   - Create a `.env` file with:  
-     ```  
-     MONGODB_URI=your_mongodb_atlas_uri  
-     TMDB_API_KEY=your_tmdb_api_key  
-     ```  
-   - Start the server:  
-     ```bash  
-     npm run start  
-     ```  
+### `reviews` Collection
 
-3. **Frontend Setup**:  
-   ```bash  
-   cd frontend  
-   npm install  
-   ```  
-   - Create a `.env` file with:  
-     ```  
-     REACT_APP_SERVER_URL=http://localhost:5000  # or your backend URL  
-     ```  
-   - Run the app:  
-     ```bash  
-     npm run build  
-     npm start  
-     ```  
+- `_id`: ObjectId
+- `userId`: ObjectId
+- `review`: String
+- `movieId`: String (TMDb ID)
+- `movieName`: String
+- `date`: Date
 
----  
+**Example:**
 
-## Live Demo 🌐  
+```json
+{
+  "_id": ObjectId("..."),
+  "userId": ObjectId("..."),
+  "review": "great movie",
+  "movieId": "950387",
+  "movieName": "A Minecraft Movie",
+  "date": ISODate("2025-05-20T12:15:00Z")
+}
+```
 
-Deployed on Netlify: [https://movierview.netlify.app/](https://movierview.netlify.app/)  
+### `users` Collection
 
----  
+- `_id`: ObjectId
+- `name`: String
+- `email`: String
+- `password`: Hashed string
+- `isBanned`: Boolean (optional)
 
-## Contributing 🤝  
+**Example:**
 
-Contributions are welcome! Open a PR or issue if you want to:  
-- Fix bugs.  
-- Add new features (e.g., movie trailers, user profiles).  
-- Improve UI/UX.  
+```json
+{
+  "_id": { "$oid": "680f4e06c9ecabeb51ca0284" },
+  "name": "minhaj ap",
+  "email": "minhajap00@gmail.com",
+  "password": hashed password goes here
+}
+```
 
----  
+### `admin` Collection
 
-## Contact 📬  
+- One document with:
 
-- **GitHub**: [@minhaj-ap](https://github.com/minhaj-ap)  
+  - `pass`: Hashed admin password
 
----  
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js & npm
+- MongoDB connection string
+- TMDb API key
+
+### Setup
+
+1. Clone the repo
+2. Install dependencies in both `frontend/` and `backend/` directories
+3. Add necessary `.env` files
+4. Run frontend:
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+5. Run backend:
+
+```bash
+cd backend
+npm install
+npm start
+```
+
+## 🔖 Version History
+
+- **v1**: Static DB with local data, full admin controls
+- **v2**: TMDb API-based, search enabled, real-time user restrictions, improved schema
+
+---

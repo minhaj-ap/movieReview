@@ -39,7 +39,7 @@ export default function MovieList({ props }) {
               <div className={`${theme} list_content`}>
                 <img src={baseUrl + e.poster_path} alt={e.title} />
                 <h3>{e.title}</h3>
-                <h6>{e.overview}</h6>
+                <h6>{e.overview || "not available at the moment"}</h6>
               </div>
               <div className="list_functions">
                 <Stack spacing={1}>

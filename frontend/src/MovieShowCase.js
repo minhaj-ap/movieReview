@@ -21,7 +21,7 @@ export default function MovieShowcase({ data, isAdmin, isSearch }) {
         </h4>
         {!(isSearch && isMobile) && (
           <h4>
-            Description:<span>{e.overview}</span>
+            Description:<span>{e.overview || "not available at the moment"}</span>
           </h4>
         )}
         {isSearch && (

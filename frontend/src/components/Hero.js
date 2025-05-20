@@ -80,7 +80,7 @@ export default function Hero() {
               <Skeleton variant="text" height={40} />{" "}
             </>
           ) : (
-            movies[movieIndex].overview
+            movies[movieIndex].overview || "not availabe at the moment"
           )}
         </p>
         <div className="rate_buttons">

@@ -267,8 +267,8 @@ async function isBanned(id) {
       .collection("users")
       .find({ _id: new ObjectId(id) })
       .toArray();
-    let isBanned;
-    if (result) {
+    let isBanned = true;
+    if (result.length) {
       isBanned = result[0].isBanned || false;
     }
     return isBanned;

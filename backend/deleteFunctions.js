@@ -7,13 +7,13 @@ async function deleteReview(id) {
     const deletion = await db
       .collection("reviews")
       .deleteOne({ _id: reviewObjectId });
-    await db
+    const removal = await db
       .collection("movie")
       .updateOne(
         { reviewIds: reviewObjectId },
         { $pull: { reviewIds: reviewObjectId } }
       );
-    return results;
+    return { deletion, removal };
   } catch (error) {
     console.error("error in transaction", error);
     throw error;

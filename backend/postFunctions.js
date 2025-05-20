@@ -32,7 +32,7 @@ async function addReview(params) {
         { $push: { reviewIds: new ObjectId(reviewId) } },
         { upsert: true }
       );
-    return true;
+    return reviewId;
   } catch (error) {
     console.error(error);
     throw error;

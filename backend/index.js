@@ -64,10 +64,17 @@ app.get("/get-movies-all", async (req, res) => {
 });
 app.post("/add-review", async (req, res) => {
   try {
-    await addReview(req.body);
+    if (req.query.user) {
+      const result = await isBanned(req.body.userId);
+      if (result) return res.status(403).json({ isBanned: true });
+    }
+    const result = await addReview(req.body);
     res
       .status(200)
-      .send({ message: "Review added successfully", data: req.body });
+      .send({
+        message: "Review added successfully",
+        data: { ...req.body, _id: result },
+      });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({
@@ -78,6 +85,10 @@ app.post("/add-review", async (req, res) => {
 });
 app.post("/edit-review/:id", async (req, res) => {
   try {
+    if (req.body.user) {
+      const result = await isBanned(req.body.user);
+      if (result) return res.status(403).json({ isBanned: true });
+    }
     const requestData = {
       id: req.params.id,
       review: req.body.review,
@@ -95,6 +106,10 @@ app.post("/edit-review/:id", async (req, res) => {
 });
 app.post("/add-rating", async (req, res) => {
   try {
+    if (req.body.userId) {
+      const result = await isBanned(req.body.userId);
+      if (result) return res.status(403).json({ isBanned: true });
+    }
     await addRating(req.body);
     res.status(200).send({ message: "Rating added successfully" });
   } catch (error) {
@@ -183,9 +198,15 @@ app.post("/admin-login", async (req, res) => {
 });
 app.delete("/delete-review/:id", async (req, res) => {
   const id = req.params.id;
+
   try {
+    if (req.body.userId) {
+      const result = await isBanned(req.body.userId);
+      if (result) return res.status(403).json({ isBanned: true });
+    }
     const result = await deleteReview(id);
-    if (result.modifiedCount === 1) {
+    console.log(result.removal);
+    if (result.removal.modifiedCount === 1) {
       res.status(200).json({ message: "Reviwew deleted successfully" });
     } else {
       res.status(404).json({ message: "Movie not found" });
@@ -251,6 +272,10 @@ app.delete("/delete-rating", async (req, res) => {
     const movieId = req.body.movieId;
     const userId = req.body.userId;
     console.log(movieId, userId);
+    if (userId) {
+      const result = await isBanned(userId);
+      if (result) return res.status(403).json({ isBanned: true });
+    }
     const result = await deleteRating(movieId, userId);
     res.status(200).json(result);
   } catch (error) {

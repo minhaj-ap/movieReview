@@ -15,8 +15,8 @@ export default function AdminHome() {
         .then((data) => {
           setNoOfReviews(data[0].numberofReviews);
           setNoOfUsers(data[0].numberofUsers);
-          setmostRatedMovie(data[0].mostRatedMovie);
-          setleastRatedMovie(data[0].leastRatedMovie);
+          setmostRatedMovie(data[0].mostRated);
+          setleastRatedMovie(data[0].leastRated);
           setRecentusers(data[0].recentUsers);
         })
         .catch((err) => {

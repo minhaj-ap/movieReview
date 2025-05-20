@@ -31,7 +31,7 @@ export default function MovieDetail({ isAdmin }) {
   const [reviews, setReviews] = useState([]);
   const [openConfirm, setOpenConfirm] = useState(false);
   const id = useParams();
-  const { isLoggedIn, uid } = useContext(AuthContext);
+  const { isLoggedIn, uid, logout } = useContext(AuthContext);
   const { theme } = useContext(ThemeContext);
   const { admin_theme } = useContext(AdminThemeContext);
   const navigate = useNavigate();
@@ -108,11 +108,17 @@ export default function MovieDetail({ isAdmin }) {
           body: JSON.stringify(dataToSent),
         }
       );
-      if (!response.ok) {
+      const data = await response.json();
+      console.log(data);
+      if (data.isBanned) {
+        toast.warning("You have been banned or deleted by the admin");
+        logout();
+      } else if (!response.ok) {
         throw new Error("Failed to add rating");
+      } else if (data.message) {
+        setOpenSaveRating(false);
+        setMoviesRatedByUser(rating);
       }
-      setOpenSaveRating(false);
-      setMoviesRatedByUser(rating);
     } catch (error) {
       console.log(error);
       toast.error(error?.message || error);
@@ -129,13 +135,20 @@ export default function MovieDetail({ isAdmin }) {
           },
           body: JSON.stringify({
             review: newReview,
+            user: uid,
           }),
         }
       );
-      if (!response.ok) {
+      const data = await response.json();
+
+      if (data.isBanned) {
+        toast.warning("You have been banned or deleted by the admin");
+        logout();
+      } else if (!response.ok) {
         throw new Error("Failed to edit review");
+      } else if (data.data) {
+        setOpenSaveReview(false);
       }
-      setOpenSaveReview(false);
     } catch (error) {
       console.log(error);
       toast.error(error?.message || error);
@@ -158,33 +171,54 @@ export default function MovieDetail({ isAdmin }) {
           }),
         }
       );
-      const data = response.json();
-      if (!response.ok) {
+      const data = await response.json();
+
+      console.log(data);
+      if (data.isBanned) {
+        toast.warning("You have been banned or deleted by the admin");
+        logout();
+      } else if (!response.ok) {
         throw new Error(data.message || "Something went wrong");
+      } else if (data.data) {
+        setMoviesReviewedByUser([
+          { review: { userReview, _id: data.data._id } },
+        ]);
+        setUserReview("");
       }
-      setMoviesReviewedByUser([{ review: userReview }]);
-      setUserReview("");
     } catch (error) {
       console.log(error);
       toast.error("An error occured");
     }
   };
+  console.log(moviesReviewedByUser);
   const deleteReview = async (e) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_SERVER_URL}/delete-review/${moviesReviewedByUser[0]._id}`,
+        `${process.env.REACT_APP_SERVER_URL}/delete-review/${
+          moviesReviewedByUser[0].review._id || moviesReviewedByUser[0]._id
+        }`,
         {
           method: "DELETE",
           headers: {
             "Content-type": "application/json",
           },
+          body: JSON.stringify({
+            userId: uid,
+          }),
         }
       );
-      if (!response.ok) {
+      console.log(response);
+      const data = await response.json();
+      console.log(data);
+      if (data.isBanned) {
+        toast.warning("You have been banned or deleted by the admin");
+        logout();
+      } else if (!response.ok) {
         throw new Error("Failed to delete Review");
+      } else if (data.message) {
+        setOpenConfirm(false);
+        setMoviesReviewedByUser([]);
       }
-      setOpenConfirm(false);
-      setMoviesReviewedByUser([]);
     } catch (error) {
       console.log(error);
       toast.error(error?.message || error);
@@ -268,7 +302,11 @@ export default function MovieDetail({ isAdmin }) {
                     onChange={handleReview}
                   />
                 ) : (
-                  <span>{newReview || moviesReviewedByUser[0].review}</span>
+                  <span>
+                    {newReview ||
+                      moviesReviewedByUser[0].review.userReview ||
+                      moviesReviewedByUser[0].review}
+                  </span>
                 )}
 
                 {openSaveReview && (

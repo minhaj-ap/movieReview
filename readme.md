@@ -52,6 +52,10 @@ Here’s how the data is structured in MongoDB:
 | `password` | String    | Hashed password            |
 | `isBanned` | Boolean   | Optional; if user is banned|
 
+### 🔷 `admin`
+| Field      | Type      | Description                |
+|------------|-----------|----------------------------|
+| `pass`     | String    | Admin's hashed password    |
 ---
 
 ## 🧩 Features

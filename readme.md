@@ -29,7 +29,7 @@ Although the user-facing experience is similar to v1, the underlying system is m
 
 ## 📊 Updated Database Schema
 
-### `movies` Collection
+### `movie` Collection
 
 - `_id`: TMDb Movie ID (number)
 - `movieName`: String
